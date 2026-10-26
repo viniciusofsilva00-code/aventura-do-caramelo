@@ -24,7 +24,7 @@ O primeiro pernil, que sai dos blocos, muda o cão para a segunda forma e aguent
 
 - Setas ou A/D: andar
 - Espaço, W ou ↑: pular (segurar pula mais alto)
-- Enter: iniciar e pausar
+- Enter ou Esc: pausar. No menu de pausa, escolha entre continuar e voltar ao menu inicial
 - F: tela cheia · M: som
 - No celular, botões na tela (TELA liga a tela cheia)
 
