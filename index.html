@@ -18,10 +18,8 @@
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);margin:0;overflow:hidden;font-family:var(--pixel);
   touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-#wrap{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
-#screen{display:block;max-width:100%;height:auto;aspect-ratio:256/240;image-rendering:pixelated;image-rendering:crisp-edges;background:#000;
-  box-shadow:0 0 0 4px var(--bezel),0 0 0 6px #000,0 18px 48px rgba(0,0,0,.6);border-radius:2px}
+#wrap{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0}
+#screen{display:block;max-width:100%;image-rendering:pixelated;image-rendering:crisp-edges;background:#000}
 #pad{position:fixed;left:0;right:0;bottom:0;display:none;justify-content:space-between;align-items:flex-end;
   padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));pointer-events:none}
 body.touch #pad{display:flex}
@@ -46,6 +44,7 @@ body.touch #pad{display:flex}
     <button class="btn" id="bR" aria-label="Direita"><span class="arrow r"></span></button>
   </div>
   <div class="grp">
+    <button class="btn small" id="bF" aria-label="Tela cheia">TELA</button>
     <button class="btn small" id="bS" aria-label="Iniciar ou pausar">START</button>
     <button class="btn jump" id="bJ" aria-label="Pular">PULO</button>
   </div>
@@ -59,7 +58,7 @@ body.touch #pad{display:flex}
 // c gato (patrulha)  m robô aspirador (linha reta)  < plataforma horizontal  ^ plataforma vertical
 // S início  H casinha (chegada)
 const LEVELS=[
-{name:"QUINTAL", sub:"DIA", theme:0, map:[
+{name:"QUINTAL", sub:"DIA", theme:0, time:300, map:[
   "........................................................",
   "........................................................",
   "........................................................",
@@ -75,7 +74,7 @@ const LEVELS=[
   "..S............c.............c.............####...c.H...",
   "##################..##############..####################",
   "##################..##############..####################"]},
-{name:"PARQUE", sub:"ENTARDECER", theme:1, map:[
+{name:"PARQUE", sub:"ENTARDECER", theme:1, time:300, map:[
   "............................................................",
   "............................................................",
   "............................................................",
@@ -91,60 +90,103 @@ const LEVELS=[
   "..S.........m.............m...............m........m.c..H...",
   "###############...##########......##########.....###########",
   "###############...##########......##########.....###########"]},
-{name:"CIDADE", sub:"NOITE", theme:2, map:[
-  "................................................................",
-  "................................................................",
-  "................................................................",
-  "................................................................",
-  "................................................................",
-  "................................................................",
-  "................................................ooo..B?B........",
-  "..............................ooo...............................",
-  ".....................ooo.?P?............ooo.....................",
-  "..........ooo...................................................",
-  ".....ooo.......m..c...........<.....c.m................m..c..H..",
-  "..S..........########.............######.....c..^..#############",
-  "##########...########...#####.....######...####....#############",
-  "##########...########...#####.....######...####....#############",
-  "##########...########...#####.....######...####....#############"]}
+{name:"CIDADE", sub:"NOITE", theme:2, time:450, map:[
+  "................................................................................................................................................................................................",
+  "................................................................................................................................................................................................",
+  "................................................................................................................................................................................................",
+  "................................................................................................................................................................................................",
+  "................................................................................................................................................................................................",
+  "....................................................................................................................................................ooo.........................................",
+  "................................................ooo..B?B................oooo......................................oooo...............ooo..................?B?...................................",
+  "..............................ooo.......................................................oooo..B?P?B.........ooo............?B?...................................ooo..........oooo..............",
+  ".....................ooo.?P?............ooo......................................ooo..................ooo.......c......................................................ooo......................",
+  "..........ooo.................................................................c...............................####...................<.......ooo..........m.c.m.................................",
+  ".....ooo.......m..c...........<.....c.m................m..c..H...........^..#####.......<.......m...c...####..####........m..c...m..................^..##########.............<.......c..m...H..",
+  "..S..........########.............######.....c..^..#####################....#####...........##########..####..####...###############.......c...####....##########...####...c......##############",
+  "##########...########...#####.....######...####....#####################....#####..####.....##########..####..####...###############.....####..####....##########...####..###.....##############",
+  "##########...########...#####.....######...####....#####################....#####..####.....##########..####..####...###############.....####..####....##########...####..###.....##############",
+  "##########...########...#####.....######...####....#####################....#####..####.....##########..####..####...###############.....####..####....##########...####..###.....##############"]}
 ];
 
-// ================= HISTÓRIA =================
-// {H} = cão escolhido, {A} e {B} = os outros dois. a = atores da cena: k tipo, x posição, f virado, run/hop animação
-const INTRO=[
- {bg:0,a:[{k:"home",x:8},{k:"vo",x:84},{k:"c0",x:112},{k:"c1",x:140},{k:"c2",x:168}],
-  t:"Vila Esperança, noite de São João. Na casa amarela da Vó Lurdes vivem três cães: Caramelo, Paçoca e Pipoca."},
- {bg:2,fx:"fogos",a:[{k:"c0",x:40,f:1,run:1},{k:"c1",x:104,run:1},{k:"c2",x:170,run:1}],
-  t:"Quando os fogos estouraram, o vento abriu o portão. Assustados, os três correram, cada um para um canto da cidade."},
- {bg:1,a:[{k:"cat",x:56},{k:"vac",x:150,f:1}],
-  t:"Lá fora, os gatos do Bigode mandam nos quintais. E os robôs-aspiradores da prefeitura varrem as ruas, levando tudo o que encontram."},
- {bg:0,a:[{k:"H",x:104,hop:1}],
-  t:"{H} parou, farejou o ar e sentiu o cheiro do bolo de fubá da vó. Hora de juntar a matilha e voltar para casa!"}];
-const CHAPTER=[
- {bg:0,title:"CAPÍTULO 1 · O QUINTAL",a:[{k:"H",x:60},{k:"cat",x:150,f:1},{k:"kennel",x:186}],
-  t:"O quintal do vizinho é território dos gatos. Pelo cheiro, {A} se escondeu numa casinha no fim do terreno."},
- {bg:1,title:"CAPÍTULO 2 · O PARQUE",a:[{k:"H",x:50,run:1},{k:"A",x:28,run:1},{k:"vac",x:160,f:1}],
-  t:"No parque, ao entardecer, começa a faxina dos robôs. O vigia viu {B} correndo atrás de um pombo, rumo à casinha perto do lago."},
- {bg:2,title:"CAPÍTULO 3 · OS TELHADOS",a:[{k:"H",x:70,run:1},{k:"A",x:48,run:1},{k:"B",x:26,run:1},{k:"cat",x:170,f:1}],
-  t:"Na cidade, as ruas estão cheias de robôs. O jeito é seguir pelos telhados, sob a lua. Cuidado: o Bigode e sua turma estão de tocaia."}];
-const FOUND=[
- {bg:0,a:[{k:"kennel",x:120},{k:"H",x:92,hop:1},{k:"A",x:156,hop:1}],
-  t:"Na casinha, {A} tremia de medo. - Achei você! Vem comigo, a vó está esperando. Mas onde se meteu {B}?"},
- {bg:1,a:[{k:"kennel",x:120},{k:"H",x:72,hop:1},{k:"A",x:94},{k:"B",x:156,hop:1}],
-  t:"{B} estava na casinha, roendo um graveto. A matilha está junta de novo! Agora só falta achar o caminho de casa."}];
-const EPILOGUE=[
- {bg:2,a:[{k:"home",x:120},{k:"vo",x:96},{k:"H",x:52,run:1},{k:"A",x:30,run:1},{k:"B",x:8,run:1}],
-  t:"Do último telhado, {H}, {A} e {B} avistaram a casa amarela. A Vó Lurdes esperava no portão, de lanterna na mão."},
- {bg:2,a:[{k:"home",x:120},{k:"vo",x:96},{k:"H",x:66,hop:1},{k:"A",x:44,hop:1},{k:"B",x:22,hop:1}],
-  t:"- Meus amores! Naquela noite teve banho morno, bolo de fubá e um osso novinho para cada um."},
- {bg:2,a:[{k:"home",x:120},{k:"cat",x:196,f:1},{k:"H",x:88},{k:"A",x:66},{k:"B",x:44}],
-  t:"E o Bigode? Ficou olhando do muro, sozinho. Dizem que agora ele dorme na casinha também. FIM."}];
+// ================= HISTÓRIAS =================
+// Uma história por cão: intro, ch (antes de cada fase), af (depois das fases 1 e 2), ep (final).
+// a = atores da cena: k tipo (H herói, cat, vac, kennel, pernil, medal), x posição, f virado, run/hop/pw animação e forma
+const STORIES=[
+ { // CARAMELO
+  intro:[
+   {bg:0,a:[{k:"H",x:70,run:1},{k:"cat",x:170,f:1}],
+    t:"Caramelo é um vira-lata da Vila Esperança. Dorme onde dá: embaixo do banco da praça, na porta da padaria, atrás do muro do vizinho."},
+   {bg:0,a:[{k:"H",x:60},{k:"kennel",x:150}],
+    t:"Um dia, um pombo fofoqueiro contou: no alto da cidade existe uma casinha vazia, com cobertor e pote cheio, esperando um dono de quatro patas."}],
+  ch:[
+   {bg:0,title:"CAPÍTULO 1 · O QUINTAL",a:[{k:"H",x:60,run:1},{k:"cat",x:150,f:1}],
+    t:"O caminho começa pelo quintal dos gatos. Eles não gostam de visita, mas Caramelo não tem medo de miado."},
+   {bg:1,title:"CAPÍTULO 2 · O PARQUE",a:[{k:"H",x:50,run:1},{k:"vac",x:160,f:1}],
+    t:"No parque, os robôs-aspiradores fazem a faxina do fim da tarde e engolem tudo o que encontram. Melhor pular por cima deles."},
+   {bg:2,title:"CAPÍTULO 3 · OS TELHADOS",a:[{k:"H",x:40,run:1},{k:"pernil",x:120},{k:"cat",x:170,f:1}],
+    t:"A última parte é a mais longa: telhado depois de telhado, até o prédio mais alto. Um pernil no caminho vira capa de herói."}],
+  af:[
+   {bg:0,a:[{k:"kennel",x:120},{k:"H",x:90,hop:1}],
+    t:"Na primeira casinha, só um bilhete roído: SIGA ATÉ O PARQUE. A casinha de verdade ainda está longe."},
+   {bg:1,a:[{k:"kennel",x:120},{k:"H",x:90,hop:1}],
+    t:"Do alto do escorregador, Caramelo avistou os telhados. A casinha está lá em cima, sob a lua."}],
+  ep:[
+   {bg:2,a:[{k:"kennel",x:110},{k:"H",x:80,hop:1,pw:1}],
+    t:"Lá estava ela: a casinha, com um cobertor xadrez e uma plaquinha pintada à mão. Estava escrito CARAMELO."},
+   {bg:2,a:[{k:"kennel",x:110},{k:"H",x:146}],
+    t:"Caramelo deu três voltas, deitou e suspirou. Depois de tanto chão, finalmente tinha um lar. FIM."}]},
+ { // PAÇOCA
+  intro:[
+   {bg:0,a:[{k:"H",x:90,run:1},{k:"medal",x:160}],
+    t:"Paçoca é a salsicha mais rápida da Vila Esperança. Ganhou três vezes a Corrida da Vila, sempre de orelhas ao vento."},
+   {bg:1,a:[{k:"cat",x:110},{k:"medal",x:140}],
+    t:"Na véspera da corrida, o gato Bigode roubou a medalha de ouro e espalhou as pistas pela cidade. Sem medalha, sem corrida!"}],
+  ch:[
+   {bg:0,title:"CAPÍTULO 1 · O QUINTAL",a:[{k:"H",x:60,run:1},{k:"cat",x:160,f:1}],
+    t:"Pegadas de gato levam ao quintal do vizinho. Paçoca fareja o chão e dispara: ninguém alcança uma salsicha decidida."},
+   {bg:1,title:"CAPÍTULO 2 · O PARQUE",a:[{k:"H",x:50,run:1},{k:"vac",x:160,f:1}],
+    t:"No parque, os robôs da faxina bloqueiam a pista. Paçoca precisa ser rápida e saltar na hora certa."},
+   {bg:2,title:"CAPÍTULO 3 · OS TELHADOS",a:[{k:"H",x:40,run:1,pw:1},{k:"cat",x:170,f:1}],
+    t:"O Bigode fugiu para o telhado mais alto da cidade. É o trecho mais longo da jornada. Com um pernil, Paçoca vira piloto de corrida."}],
+  af:[
+   {bg:0,a:[{k:"kennel",x:120},{k:"H",x:90}],
+    t:"Na casinha, um recado do Bigode: SE QUER A MEDALHA, ME PEGUE NO PARQUE."},
+   {bg:1,a:[{k:"kennel",x:120},{k:"H",x:90},{k:"vac",x:160,f:1}],
+    t:"A medalha não estava no parque. Mas um robô, cheio de poeira, cuspiu outra pista: um mapa dos telhados."}],
+  ep:[
+   {bg:2,a:[{k:"kennel",x:120},{k:"H",x:84,hop:1,pw:1},{k:"medal",x:160},{k:"cat",x:184,f:1}],
+    t:"No último telhado, a medalha brilhava ao lado da casinha. O Bigode, sem fôlego, desistiu da fuga."},
+   {bg:0,a:[{k:"H",x:96,hop:1},{k:"medal",x:126},{k:"cat",x:170,f:1}],
+    t:"Na manhã seguinte, Paçoca venceu a Corrida da Vila pela quarta vez. O Bigode assistiu tudo da primeira fila. FIM."}]},
+ { // PIPOCA
+  intro:[
+   {bg:1,a:[{k:"H",x:104,hop:1}],
+    t:"Pipoca é um pug famoso, estrela do comercial de ração Crocante Feliz. Mas, de tanta ração de mentirinha, nunca provou comida de verdade."},
+   {bg:2,a:[{k:"H",x:70},{k:"pernil",x:140}],
+    t:"No estúdio, contavam a lenda do Pernil Dourado, guardado no telhado mais alto da cidade. Pipoca fugiu da gravação na mesma hora."}],
+  ch:[
+   {bg:0,title:"CAPÍTULO 1 · O QUINTAL",a:[{k:"H",x:60,hop:1},{k:"cat",x:160,f:1}],
+    t:"Primeira parada: o quintal dos gatos. Pipoca não corre muito, mas pula mais alto que qualquer cão da vila."},
+   {bg:1,title:"CAPÍTULO 2 · O PARQUE",a:[{k:"H",x:50,run:1},{k:"vac",x:160,f:1}],
+    t:"No parque, os robôs da faxina aspiram tudo, até petisco caído no chão. Pipoca precisa chegar antes deles."},
+   {bg:2,title:"CAPÍTULO 3 · OS TELHADOS",a:[{k:"H",x:40,hop:1,pw:1},{k:"pernil",x:180}],
+    t:"Telhado após telhado, sob a lua. O caminho é longo, mas lá no alto há um brilho dourado. Será o pernil?"}],
+  af:[
+   {bg:0,a:[{k:"kennel",x:120},{k:"H",x:90},{k:"cat",x:160,f:1}],
+    t:"Na casinha, um gato velho jurou ter sentido cheiro de pernil vindo do parque. A barriga de Pipoca roncou."},
+   {bg:1,a:[{k:"kennel",x:120},{k:"H",x:90,hop:1}],
+    t:"Os robôs não acharam o Pernil Dourado. Ele estava mesmo nos telhados, lá onde só se chega pulando."}],
+  ep:[
+   {bg:2,a:[{k:"kennel",x:130},{k:"H",x:70,pw:1},{k:"pernil",x:100},{k:"cat",x:170,f:1}],
+    t:"Era o Pernil Dourado, enorme e cheiroso. Pipoca ia dar a primeira mordida quando viu os gatos olhando, com fome."},
+   {bg:2,a:[{k:"H",x:70,hop:1,pw:1},{k:"pernil",x:100},{k:"cat",x:140,f:1},{k:"cat",x:170,f:1}],
+    t:"Pipoca dividiu o pernil com todo mundo. Naquela noite ganhou algo melhor que fama: amigos. FIM."}]}];
 
 // ================= PALETA (16 cores) =================
 const PAL={K:"#0b0b1a",W:"#f8f8f0",k:"#1a1c3a",n:"#3a3f7a",s:"#78b8f8",b:"#c4e4fc",o:"#f89838",O:"#a85820",
   y:"#f8d878",g:"#48a838",G:"#206830",r:"#d83838",p:"#c86890",q:"#7c7c8c",Q:"#44465a",t:"#e8b888"};
 
-const W=256,H=240,TS=16,STEP=1000/60;
+let W=256;const H=240,TS=16,STEP=1000/60;
 const cv=document.getElementById("screen"),ctx=cv.getContext("2d");
 ctx.imageSmoothingEnabled=false;
 const FONT='8px "Press Start 2P", ui-monospace, monospace';
@@ -180,16 +222,19 @@ const PIPOCA_TOP=[
 "..........KK.KK.","..........ttttt.","..........tKtKtt","..........KKKKKt","...tt.....tKpKt.",
 "..t..t...nntttt.","...tttttttttttt.","..ttttttttttttt.","..tttttttttttt.."];
 const PIPOCA_LEGS=[["...tO......tO...","...tO......tO...","...KK......KK..."],["..tO........tO..",".tO..........tO.",".KK..........KK."],[".tO..........tO.","tO............tO","................"]];
-const dogSet=(top,legs,collar,pw)=>legs.map(l=>spr(top.concat(l),true,pw?{[collar]:"y"}:null));
+// Segunda forma (com pernil): coleira dourada + acessório próprio de cada cão
+function dogSet(top,legs,collar,ov){return legs.map(l=>{let rows=top.concat(l);
+  if(ov)rows=rows.map((r,j)=>{r=j<top.length?r.split(collar).join("y"):r;const o=ov[j];if(!o)return r;
+    let out="";for(let i=0;i<16;i++)out+=(o[i]&&o[i]!==".")?o[i]:(r[i]||".");return out;});
+  return spr(rows);});}
+const CAPE={7:"........rr......",8:"......rrr.......",9:"...rrrrrr.......",10:".rrrrrr.........",11:"rrrr............"};
+const PILOT={5:"...........qqq..",6:"..........qqqqq.",7:"...........sWs..",9:"......WWW.......",10:"...WWW.........."};
+const ROYAL={2:"..........y.y.y.",3:"..........yyyyy.",9:"......ppp.......",10:"...pppppp.......",11:".ppppp..........",12:"pp.............."};
 // Personagens: max = velocidade máxima, jump = impulso do pulo, hold = gravidade com o botão segurado
 const CHARS=[
-  {name:"CARAMELO",breed:"VIRA-LATA",vel:2,pulo:2,max:2.2,jump:6.2,hold:.28,f:dogSet(DOG_TOP,DOG_LEGS,"r"),fp:dogSet(DOG_TOP,DOG_LEGS,"r",1)},
-  {name:"PAÇOCA",breed:"SALSICHA",vel:3,pulo:1,max:2.5,jump:5.9,hold:.28,f:dogSet(PACOCA_TOP,PACOCA_LEGS,"s"),fp:dogSet(PACOCA_TOP,PACOCA_LEGS,"s",1)},
-  {name:"PIPOCA",breed:"PUG",vel:1,pulo:3,max:1.95,jump:6.6,hold:.27,f:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n"),fp:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n",1)}];
-const VO=spr([
-"...WWWWW....","..WWWWWWW...","..WttttttW..","..tKKtKKt...","..tttttttt..","...ttppt....","....tttt....",
-"..pppppppp..",".pppWpppppp.","tppppppWppt.","tpppppppppt.","tppWppppppt.",".pppppppWpp.",".pppppppppp.",
-"..pppppppp..","..pppppppp..","...tt..tt...","...KK..KK..."]);
+  {name:"CARAMELO",breed:"VIRA-LATA",form:"CAPA DE HERÓI",vel:2,pulo:2,max:2.2,jump:6.2,hold:.28,f:dogSet(DOG_TOP,DOG_LEGS,"r"),fp:dogSet(DOG_TOP,DOG_LEGS,"r",CAPE)},
+  {name:"PAÇOCA",breed:"SALSICHA",form:"PILOTO",vel:3,pulo:1,max:2.5,jump:5.9,hold:.28,f:dogSet(PACOCA_TOP,PACOCA_LEGS,"s"),fp:dogSet(PACOCA_TOP,PACOCA_LEGS,"s",PILOT)},
+  {name:"PIPOCA",breed:"PUG",form:"REALEZA",vel:1,pulo:3,max:1.95,jump:6.6,hold:.27,f:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n"),fp:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n",ROYAL)}];
 const CAT_TOP=[
 "................","................","................","................",
 "..........Q...Q.","..........QQ.QQ.","..........qqqqq.","Q.........qyqyq.",
@@ -272,7 +317,8 @@ addEventListener("keydown",e=>{
   if(e.code==="Enter"||e.code==="NumpadEnter")enterEdge=true;
   if(e.code==="ArrowLeft"||e.code==="KeyA")leftEdge=true;
   if(e.code==="ArrowRight"||e.code==="KeyD")rightEdge=true;
-  if(e.code==="KeyM")muted=!muted;});
+  if(e.code==="KeyM")muted=!muted;
+  if(e.code==="KeyF")toggleFull();});
 addEventListener("keyup",e=>{keys[e.code]=false;});
 const held=()=>({l:keys.ArrowLeft||keys.KeyA||touch.l, r:keys.ArrowRight||keys.KeyD||touch.r, j:JUMPK.some(k=>keys[k])||touch.j});
 function bindBtn(id,on,off){const el=document.getElementById(id);
@@ -284,25 +330,30 @@ bindBtn("bL",()=>{touch.l=true;leftEdge=true;},()=>touch.l=false);
 bindBtn("bR",()=>{touch.r=true;rightEdge=true;},()=>touch.r=false);
 bindBtn("bJ",()=>{touch.j=true;jumpEdge=true;},()=>touch.j=false);
 bindBtn("bS",()=>{enterEdge=true;});
+bindBtn("bF",()=>toggleFull());
+document.addEventListener("fullscreenchange",()=>setTimeout(fit,50));
 cv.addEventListener("pointerdown",()=>{audioOn();if(["title","over","win","story","select"].includes(G.state))enterEdge=true;});
 addEventListener("blur",()=>{if(G.state==="play"){G.state="pause";}for(const k in keys)keys[k]=false;touch.l=touch.r=touch.j=false;});
 const isTouch=matchMedia("(pointer: coarse)").matches||"ontouchstart" in window;
 if(isTouch)document.body.classList.add("touch");
 
+// Tela inteira: altura fixa de 240 pixels e largura que acompanha a janela (256 a 480)
 function fit(){
-  const vw=innerWidth,vh=innerHeight;let aw=vw-32,ah=vh-32;
-  if(isTouch&&vh>vw)ah-=150;
-  let s=Math.min(aw/W,ah/H);if(s>=3)s=Math.floor(s);s=Math.max(.5,s);
-  cv.style.width=Math.round(W*s)+"px";
-  document.getElementById("wrap").style.paddingBottom=(isTouch&&vh>vw)?"170px":"";}
+  const vw=innerWidth,vh=innerHeight-((isTouch&&vh0()>vw)?150:0);
+  let s=vh/H,w=Math.round(vw/s);if(w<256){w=256;s=vw/256;}if(w>480){w=480;s=Math.min(vh/H,vw/480);}
+  W=w;if(cv.width!==W)cv.width=W;cv.style.width=Math.round(W*s)+"px";cv.style.height=Math.round(H*s)+"px";
+  document.getElementById("wrap").style.paddingBottom=(isTouch&&vh0()>vw)?"150px":"0";}
+function vh0(){return innerHeight;}
+function toggleFull(){try{if(document.fullscreenElement)document.exitFullscreen();
+  else{const el=document.documentElement,f=el.requestFullscreen||el.webkitRequestFullscreen;if(f){const pr=f.call(el);if(pr&&pr.catch)pr.catch(()=>{});}}}catch(e){}}
 addEventListener("resize",fit);addEventListener("orientationchange",fit);addEventListener("load",fit);fit();
 
 // ================= ESTADO =================
-const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,scoreMark:0,char:0,t:0,cardT:0,stateT:0,cam:0,pages:[],page:0,storyT:0,after:null};
-let map=[],cols=0,rows=0,theme=THEMES[0],ents=[],plats=[],items=[],parts=[],pops=[],house=null,bumps={},P=null,frameT=0,combo=0,trail=[];
+const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,char:0,t:0,cardT:0,stateT:0,cam:0,pages:[],page:0,storyT:0,after:null};
+let map=[],cols=0,rows=0,theme=THEMES[0],ents=[],plats=[],items=[],parts=[],pops=[],house=null,bumps={},P=null,frameT=0,combo=0;
 const CH=()=>CHARS[G.char];
-const friends=()=>[0,1,2].filter(i=>i!==G.char);
-const fill=t=>t.replace(/\{H\}/g,CH().name).replace(/\{A\}/g,CHARS[friends()[0]].name).replace(/\{B\}/g,CHARS[friends()[1]].name);
+const ST=()=>STORIES[G.char];
+const fill=t=>t;
 const SOLID="#B?PU";
 function solid(c,r){if(c<0||c>=cols)return true;if(r<0||r>=rows)return false;return SOLID.includes(map[r][c]);}
 
@@ -321,22 +372,21 @@ function loadLevel(i){
     else keep=true;
     if(!keep)map[r][c]=".";}
   P={x:sx,y:sy,w:12,h:14,vx:0,vy:0,face:1,onGround:false,coyote:0,jbuf:0,ride:null,inv:0,power:false,anim:0,prevB:0,hidden:false};
-  trail=[];G.time=300;G.t=0;G.cam=0;updCam();}
+  G.time=L.time||300;G.t=0;G.cam=0;updCam();}
 
 function toCard(i,fresh){
   if(fresh)G.snap={score:G.score,bones:G.bones};else{G.score=G.snap.score;G.bones=G.snap.bones;}
   G.level=i;loadLevel(i);G.state="card";G.cardT=150;}
 function story(pages,after){G.pages=pages;G.page=0;G.storyT=0;G.after=after;G.state="story";}
 // Recomeço sempre na fase 1; o prólogo só aparece quando se escolhe o cão
-function newGame(withIntro){G.lives=3;G.score=0;G.bones=0;G.lifeMark=0;G.scoreMark=0;
-  if(withIntro)story(INTRO.concat(CHAPTER[0]),()=>toCard(0,true));else toCard(0,true);}
+function newGame(withIntro){G.lives=3;G.score=0;G.bones=0;G.lifeMark=0;
+  if(withIntro)story(ST().intro.concat(ST().ch[0]),()=>toCard(0,true));else toCard(0,true);}
 
-// Vida extra por pontuação: 5.000, 12.000, 20.000 e depois a cada 10.000 (máximo de 9 vidas)
-const lifeAt=k=>k<3?[5000,12000,20000][k]:20000+(k-2)*10000;
+// Vida extra a cada 20 ossos (máximo de 9 vidas). lifeMark não volta ao morrer, então repetir a fase não rende vida de novo
+const BONES_PER_LIFE=20;
 function gainLife(){if(G.lives<9)G.lives++;SFX.life();if(P)pops.push({x:P.x-4,y:P.y-12,t:70,s:"1UP"});}
-function addScore(n,x,y){G.score+=n;if(x!==undefined)pops.push({x,y,t:40,s:String(n)});
-  while(G.score>=lifeAt(G.scoreMark)){G.scoreMark++;gainLife();}}
-function addBones(n){G.bones+=n;const m=Math.floor(G.bones/50);if(m>G.lifeMark){G.lifeMark=m;gainLife();}}
+function addScore(n,x,y){G.score+=n;if(x!==undefined)pops.push({x,y,t:40,s:String(n)});}
+function addBones(n){G.bones+=n;const m=Math.floor(G.bones/BONES_PER_LIFE);if(m>G.lifeMark){G.lifeMark=m;gainLife();}}
 function puff(x,y,col,n=6){for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*2.4,vy:-Math.random()*2.2,t:20+Math.random()*12,col});}
 
 // ================= FÍSICA =================
@@ -380,7 +430,6 @@ function updPlayer(){
   if(P.onGround)combo=0;
   P.anim=P.onGround&&Math.abs(P.vx)>.3?P.anim+Math.abs(P.vx)*.08:0;
   if(P.inv>0)P.inv--;
-  const lt=trail[trail.length-1];if(!lt||Math.abs(lt.x-P.x)+Math.abs(lt.y-P.y)>.4){trail.push({x:P.x,y:P.y,face:P.face,f:pFrame()});if(trail.length>64)trail.shift();}
   if(P.y>rows*TS+8)die(true);}
 function pFrame(){return G.state==="dying"||!P.onGround?2:P.anim>0?Math.floor(P.anim)%2:0;}
 
@@ -402,7 +451,7 @@ function updItems(){
     else if(it.type==="treat"){
       if(it.rise>0){it.y-=.5;it.rise-=.5;}
       else{it.vy=Math.min(5,it.vy+.4);if(moveX(it,it.vx))it.vx=-it.vx;moveY(it,it.vy);if(it.y>rows*TS)it.gone=true;}
-      if(overlap(P,it)){it.gone=true;SFX.power();if(P.power)addScore(1000,it.x,it.y);else{P.power=true;addScore(500,it.x,it.y);}puff(it.x+6,it.y+6,"y",10);}}}
+      if(overlap(P,it)){it.gone=true;SFX.power();if(P.power)addScore(1000,it.x,it.y);else{P.power=true;addScore(500);pops.push({x:P.x-16,y:P.y-14,t:70,s:CH().form+"!"});}puff(it.x+6,it.y+6,"y",10);}}}
   items=items.filter(i=>!i.gone);}
 
 function collide(){
@@ -416,7 +465,7 @@ function die(pit){if(G.state!=="play")return;G.state="dying";G.stateT=110;P.vy=p
 
 function updPlats(){for(const m of plats){const ph=Math.sin(frameT*2*Math.PI/m.per)*m.A;
   const nx=m.kind==="h"?m.x0+ph:m.x0,ny=m.kind==="v"?m.y0+ph:m.y0;m.dx=nx-m.x;m.dy=ny-m.y;m.x=nx;m.y=ny;}}
-function updCam(){const max=cols*TS-W;G.cam=Math.round(Math.max(0,Math.min(max,P.x+P.w/2-118)));}
+function updCam(){const max=cols*TS-W;G.cam=Math.round(Math.max(0,Math.min(max,P.x+P.w/2-W*.45)));}
 function updFx(){for(const p of parts){p.vy+=.15;p.x+=p.vx;p.y+=p.vy;p.t--;}parts=parts.filter(p=>p.t>0);
   for(const p of pops){p.y-=.5;p.t--;}pops=pops.filter(p=>p.t>0);
   for(const k in bumps)if(--bumps[k]<=0)delete bumps[k];}
@@ -448,8 +497,8 @@ function update(){
     updFx();if(P.x<house.x+10)P.x+=.8;if(P.x>house.x+10)P.x-=.8;P.hidden=G.stateT<30;
     if(G.time>0){if(G.stateT<=0){const d=Math.min(3,G.time);G.time-=d;addScore(10*d);if(G.time%9===0)tone(880,880,.03,"square",.03);}}
     else if(G.stateT<=-50){const n=G.level;
-      if(n<LEVELS.length-1)story([FOUND[n],CHAPTER[n+1]],()=>toCard(n+1,true));
-      else story(EPILOGUE,()=>{G.state="win";G.stateT=40;SFX.life();});}
+      if(n<LEVELS.length-1)story([ST().af[n],ST().ch[n+1]],()=>toCard(n+1,true));
+      else story(ST().ep,()=>{G.state="win";G.stateT=40;SFX.life();});}
     if(G.time<=0&&G.stateT>-60)G.stateT--;}
   else if(st==="over"){if((enterEdge||jumpEdge)&&G.stateT<=0)newGame(false);}
   else if(st==="win"){updFx();if((enterEdge||jumpEdge)&&G.stateT<=0){G.state="title";G.stateT=20;}}
@@ -521,10 +570,6 @@ function drawItems(cx){for(const it of items){
   else if(it.type==="pop")drawSpr(BONE,it.x-cx-1,it.y,false);
   else if(it.type==="treat")drawSpr(TREAT,it.x-cx,it.y+3,it.vx<0);}}
 
-// Amigos resgatados seguem o herói pelo rastro dele
-function drawFollowers(cx){if(G.state==="dying"||!trail.length)return;const fr=friends();
-  for(let k=Math.min(G.level,2);k>=1;k--){const h=trail[Math.max(0,trail.length-1-k*16)];
-    const idle=P.onGround&&Math.abs(P.vx)<.3;drawSpr(CHARS[fr[k-1]].f[idle?0:h.f],h.x-cx-2-(trail.length<k*16?k*14*P.face:0),h.y+P.h-16,h.face<0);}}
 function drawPlayer(cx){if(P.hidden)return;if(P.inv>0&&Math.floor(P.inv/4)%2)return;
   const set=P.power?CH().fp:CH().f;
   drawSpr(set[pFrame()],P.x-cx-2,P.y+P.h-16,P.face<0);
@@ -544,82 +589,75 @@ function drawHUD(){
 
 function drawPanel(x,y,w,h){ctx.fillStyle="rgba(11,11,26,.82)";ctx.fillRect(x,y,w,h);R2(x,y,w,1,"W");R2(x,y+h-1,w,1,"W");R2(x,y,1,h,"W");R2(x+w-1,y,1,h,"W");}
 
-function drawWorld(){const cx=G.cam;drawBG(theme===THEMES[0]?0:theme===THEMES[1]?1:2,cx);drawTiles(cx);drawHouse(cx);drawPlats(cx);drawItems(cx);drawEnts(cx);drawFollowers(cx);drawPlayer(cx);
+function drawWorld(){const cx=G.cam;drawBG(theme===THEMES[0]?0:theme===THEMES[1]?1:2,cx);drawTiles(cx);drawHouse(cx);drawPlats(cx);drawItems(cx);drawEnts(cx);drawPlayer(cx);
   for(const p of parts)R2(p.x-cx,p.y,2,2,p.col);for(const p of pops)txt(p.s,p.x-cx,p.y,"W");}
 
 const blink=()=>Math.floor(performance.now()/450)%2===0;
 function wrap(s,n=27){const out=[];let line="";for(const w of s.split(" ")){if(line&&(line+" "+w).length>n){out.push(line);line=w;}else line=line?line+" "+w:w;}if(line)out.push(line);return out;}
-function drawDog(i,x,y,o={},t=0){const fr=CHARS[i].f;let f=0,dy=0;
+function drawDog(i,x,y,o={},t=0){const fr=o.pw?CHARS[i].fp:CHARS[i].f;let f=0,dy=0;
   if(o.run)f=Math.floor(t/7)%2;if(o.hop){const ph=Math.abs(Math.sin(t/9));dy=-Math.round(ph*7);f=ph>.2?2:0;}
   drawSpr(fr[f],x,y+dy,!!o.f);}
-function drawHome(x,y,night){
-  for(let j=0;j<18;j++){const hw=8+Math.round(j*1.4);R2(x+32-hw,y+j,hw*2,1,"r");R2(x+31-hw,y+j,1,1,"K");R2(x+32+hw,y+j,1,1,"K");}
-  R2(x+44,y-2,6,10,"Q");R2(x+3,y+18,58,30,"y");for(let j=y+23;j<y+48;j+=5)R2(x+3,j,58,1,"o");R2(x,y+17,64,2,"K");
-  for(const wx of [9,45]){R2(x+wx,y+25,11,11,"K");R2(x+wx+1,y+26,9,9,night?"y":"b");R2(x+wx+5,y+26,1,9,"K");}
-  R2(x+25,y+27,14,21,"K");R2(x+26,y+28,12,20,"O");R2(x+35,y+38,2,2,"y");}
-function fireworks(t){const B=[[40,128,"y",0],[118,120,"r",24],[196,132,"s",12],[150,142,"W",36]];
-  for(const [bx,by,c,o] of B){const ph=(t+o)%60,r=ph*.6;if(ph>44)continue;
-    for(let i=0;i<10;i++){const a=i/10*Math.PI*2;R2(bx+Math.cos(a)*r,by+Math.sin(a)*r,2,2,c);}}}
+function drawMedal(x,y){R2(x+2,y,3,6,"r");R2(x+7,y,3,6,"s");disc(x+6,y+10,5,"K");disc(x+6,y+10,4,"y");R2(x+5,y+8,2,4,"o");}
 function drawScene(pg,t){
   ctx.save();ctx.beginPath();ctx.rect(16,16,224,84);ctx.clip();ctx.translate(16,-100);
   drawBG(pg.bg,[40,120,300][pg.bg]);const th=THEMES[pg.bg];for(let x=0;x<240;x+=16)ctx.drawImage(th.top,x,184);
-  if(pg.fx==="fogos")fireworks(t);
-  const fr=friends(),dogIdx={H:G.char,A:fr[0],B:fr[1],c0:0,c1:1,c2:2};
   for(const a of pg.a){
-    if(a.k in dogIdx)drawDog(dogIdx[a.k],a.x,168,a,t+a.x);
+    if(a.k==="H")drawDog(G.char,a.x,168,a,t+a.x);
+    else if(a.k==="pernil")drawSpr(TREAT,a.x,173+Math.round(Math.sin(t/10)*2),false);
+    else if(a.k==="medal")drawMedal(a.x,166);
     else if(a.k==="cat")drawSpr(CAT[Math.floor(t/12)%2],a.x,168,!!a.f);
     else if(a.k==="vac")drawSpr(VAC[Math.floor(t/6)%2],a.x,174,!!a.f);
-    else if(a.k==="vo")drawSpr(VO,a.x,166,false);
-    else if(a.k==="home")drawHome(a.x,136,pg.bg===2);
     else if(a.k==="kennel")drawKennel(a.x,152);}
   ctx.restore();
   R2(15,15,226,1,"W");R2(15,100,226,1,"W");R2(15,15,1,86,"W");R2(240,15,1,86,"W");}
 function render(){
-  ctx.imageSmoothingEnabled=false;const st=G.state;
+  ctx.imageSmoothingEnabled=false;ctx.setTransform(1,0,0,1,0,0);const st=G.state,ox=Math.floor((W-256)/2);
+  const ui=()=>ctx.setTransform(1,0,0,1,ox,0);
   if(st==="title"){
-    drawBG(0,(performance.now()/40)%2000);R2(0,208,W,32,"O");ctx.drawImage(THEMES[0].top,0,208);for(let x=0;x<W;x+=16){ctx.drawImage(THEMES[0].top,x,208);ctx.drawImage(THEMES[0].fill,x,224);}
-    txt("AVENTURA DO",128,22,"W","center");txt("CARAMELO",128,36,"o","center",true);txt("E A MATILHA DA VÓ LURDES",128,56,"y","center");
+    drawBG(0,(performance.now()/40)%2000);for(let x=0;x<W;x+=16){ctx.drawImage(THEMES[0].top,x,208);ctx.drawImage(THEMES[0].fill,x,224);}
+    ui();txt("AVENTURA DO",128,26,"W","center");txt("CARAMELO",128,40,"o","center",true);
     drawPanel(20,70,216,62);
     txt("SETAS OU A/D   ANDAR",30,78,"W");txt("ESPAÇO/W/CIMA  PULAR",30,90,"W");txt("ENTER          PAUSAR",30,102,"W");
     txt("PULE NOS GATOS E ROBÔS!",128,116,"y","center");
     const tt=performance.now()/16;for(let i=0;i<3;i++){ctx.save();ctx.translate(52+i*60,176);ctx.scale(2,2);
       const f=CHARS[i].f[Math.floor((tt+i*20)/10)%2];ctx.drawImage(f.r,-1,-1);ctx.restore();}
     if(blink())txt(isTouch?"TOQUE EM START":"APERTE ENTER",128,148,"W","center");
-    txt("M: SOM",248,228,"b","right");return;}
+    txt(isTouch?"":"F: TELA CHEIA",8,228,"b");txt("M: SOM",248,228,"b","right");return;}
   if(st==="select"){
-    drawBG(0,200);txt("ESCOLHA SEU CÃO",128,18,"W","center",true);
-    for(let i=0;i<3;i++){const c=CHARS[i],x=8+i*82,y=46,sel=i===G.char;
-      drawPanel(x,y,76,128);if(sel){R2(x-1,y-1,78,2,"y");R2(x-1,y+127,78,2,"y");R2(x-1,y-1,2,130,"y");R2(x+75,y-1,2,130,"y");}
-      const bob=sel?-Math.round(Math.abs(Math.sin(performance.now()/160))*4):0;
-      ctx.save();ctx.translate(x+22,y+12+bob);ctx.scale(2,2);ctx.drawImage(c.f[sel?Math.floor(performance.now()/140)%2:0].r,-1,-1);ctx.restore();
-      txt(c.name,x+38,y+56,sel?"y":"W","center");txt(c.breed,x+38,y+68,"b","center");
+    drawBG(0,200);ui();txt("ESCOLHA SEU CÃO",128,18,"W","center",true);
+    for(let i=0;i<3;i++){const c=CHARS[i],x=8+i*82,y=40,sel=i===G.char;
+      drawPanel(x,y,76,124);if(sel){R2(x-1,y-1,78,2,"y");R2(x-1,y+123,78,2,"y");R2(x-1,y-1,2,126,"y");R2(x+75,y-1,2,126,"y");}
+      const bob=sel?-Math.round(Math.abs(Math.sin(performance.now()/160))*4):0,pw=sel&&Math.floor(performance.now()/1500)%2===1;
+      ctx.save();ctx.translate(x+22,y+12+bob);ctx.scale(2,2);ctx.drawImage((pw?c.fp:c.f)[sel?Math.floor(performance.now()/140)%2:0].r,-1,-1);ctx.restore();
+      txt(c.name,x+38,y+56,sel?"y":"W","center");txt(pw?"+PERNIL":c.breed,x+38,y+68,pw?"o":"b","center");
       txt("VEL",x+6,y+90,"W");txt("PULO",x+6,y+106,"W");
       for(let k=0;k<3;k++){R2(x+42+k*10,y+90,8,8,"K");R2(x+43+k*10,y+91,6,6,k<c.vel?"o":"Q");
         R2(x+42+k*10,y+106,8,8,"K");R2(x+43+k*10,y+107,6,6,k<c.pulo?"g":"Q");}}
-    txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS ESCOLHEM",128,190,"W","center");
-    if(!isTouch)txt("ENTER CONFIRMA",128,204,"W","center");return;}
-  if(st==="story"){R2(0,0,W,H,"K");const pg=G.pages[G.page];drawScene(pg,performance.now()/16);
+    drawPanel(8,172,240,48);txt("COM PERNIL: "+CH().form,128,180,"o","center");
+    txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS ESCOLHEM",128,194,"W","center");
+    if(!isTouch)txt("ENTER CONFIRMA",128,206,"W","center");return;}
+  if(st==="story"){R2(0,0,W,H,"K");ui();const pg=G.pages[G.page];drawScene(pg,performance.now()/16);
     let y=110;if(pg.title){txt(pg.title,128,y,"y","center");y+=16;}
     let left=Math.floor(G.storyT*1.5);
     for(const line of wrap(fill(pg.t).toUpperCase())){if(left<=0)break;txt(line.slice(0,left),20,y,"W");left-=line.length+1;y+=11;}
     if(G.storyT*1.5>=fill(pg.t).length&&blink())txt((isTouch?"PULO":"ENTER")+" >",236,226,"y","right");
     txt((G.page+1)+"/"+G.pages.length,20,226,"Q");return;}
-  if(st==="card"){R2(0,0,W,H,"K");const L=LEVELS[G.level];
+  if(st==="card"){R2(0,0,W,H,"K");ui();const L=LEVELS[G.level];
     txt("FASE "+(G.level+1),128,80,"W","center",true);txt(L.name+" · "+L.sub,128,104,"o","center");
     ctx.drawImage(HEART.r,100,136);txt("x "+G.lives,112,136,"W");ctx.drawImage(BONE_S.r,100,152);txt("x "+pad(G.bones,2),112,152,"W");
     txt(pad(G.score,6)+" PONTOS",128,176,"b","center");
-    txt("VIDA EXTRA EM "+lifeAt(G.scoreMark),128,196,"Q","center");
-    const fr=friends();for(let k=Math.min(G.level,2);k>=1;k--)drawDog(fr[k-1],120-k*20,44,{});drawDog(G.char,120,44,{});return;}
-  drawWorld();drawHUD();
+    txt("VIDA EXTRA EM "+(BONES_PER_LIFE*(G.lifeMark+1)-G.bones)+" OSSOS",128,196,"Q","center");
+    drawDog(G.char,120,44,{});return;}
+  drawWorld();ui();drawHUD();
   if(st==="pause"){drawPanel(64,96,128,48);txt("PAUSA",128,108,"W","center",true);txt("ENTER CONTINUA",128,128,"b","center");}
   if(st==="clear"){drawPanel(40,72,176,52);txt("CASINHA!",128,82,"y","center",true);txt("BÔNUS DE TEMPO",128,106,"W","center");}
-  if(st==="over"){R2(0,0,W,H,"K");txt("FIM DE JOGO",128,84,"r","center",true);txt("PAROU NA FASE "+(G.level+1)+" · "+LEVELS[G.level].name,128,112,"W","center");
+  if(st==="over"){ctx.setTransform(1,0,0,1,0,0);R2(0,0,W,H,"K");ui();txt("FIM DE JOGO",128,84,"r","center",true);txt("PAROU NA FASE "+(G.level+1)+" · "+LEVELS[G.level].name,128,112,"W","center");
     txt(pad(G.snap.score,6)+" PONTOS",128,128,"b","center");txt("A JORNADA RECOMEÇA",128,156,"W","center");
     if(blink())txt((isTouch?"START":"ENTER")+": VOLTAR À FASE 1",128,172,"y","center");}
-  if(st==="win"){ctx.fillStyle="rgba(11,11,26,.7)";ctx.fillRect(0,0,W,H);drawPanel(24,44,208,150);
-    txt("VITÓRIA!",128,56,"y","center",true);txt("A MATILHA ESTÁ",128,82,"W","center");txt("EM CASA!",128,94,"W","center");
+  if(st==="win"){ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle="rgba(11,11,26,.7)";ctx.fillRect(0,0,W,H);ui();drawPanel(24,44,208,150);
+    txt("VITÓRIA!",128,56,"y","center",true);txt(CH().name,128,82,"o","center");txt("MISSÃO CUMPRIDA!",128,94,"W","center");
     txt("PONTOS  "+pad(G.score,6),128,116,"W","center");txt("OSSOS   "+pad(G.bones,6),128,130,"W","center");
-    const tt=performance.now()/16;for(let i=0;i<3;i++)drawDog(i,92+i*24,150,{hop:1},tt+i*13);
+    drawDog(G.char,120,150,{hop:1,pw:1},performance.now()/16);
     if(blink())txt(isTouch?"START: JOGAR DE NOVO":"ENTER: JOGAR DE NOVO",128,178,"y","center");
     if(frameT%3===0)parts.push({x:G.cam+Math.random()*W,y:-4,vx:(Math.random()-.5),vy:1,t:200,col:["y","r","o","W","s"][frameT%5]});}}
 
