@@ -11,6 +11,7 @@ Jogo de plataforma 2D no estilo 8-bit. Escolha um dos três cães e atravesse o 
 | Fácil | cerca de metade | libera o Floquinho |
 | Médio | quantidade normal | libera o Trovão |
 | Difícil | quase o dobro | libera a Nevasca |
+| Impossível | cerca de quatro vezes mais, e mais rápidos | libera o Parafuso |
 
 Os cães liberados ficam salvos no navegador. Também existe um código secreto, digitado na tela inicial, que libera todos de uma vez.
 
@@ -24,6 +25,13 @@ Os cães liberados ficam salvos no navegador. Também existe um código secreto,
 | Floquinho 🔒 | poodle | média | médio | bailarina | **Pulo triplo**: mais dois pulos no ar |
 | Trovão 🔒 | pastor | alta | médio | policial | **Latido sônico**: ondas de latido derrubam os inimigos à frente |
 | Nevasca 🔒 | husky | alta | alto | gelo | **Congelar**: os inimigos param e quebram ao encostar |
+| Parafuso 🔒 | robô | média | médio | antena | **Ímã de ossos**: os ossos por perto vêm até ele |
+
+### Parafuso, o cão-robô
+
+- Sempre ativo: engole os gatos e não leva dano deles; os robôs aspiradores viram aliados, seguem ele e não machucam.
+- Em compensação, com ele o chão das fases desmorona: dois segundos depois do início, uma onda apaga o chão atrás dele, cada fase mais rápida. Parar é cair.
+- Depois da fase 3 vem o chefão **MECA-BIGODE**, um gato-robô gigante que corre, salta e atira parafusos. Ele machuca o Parafuso e precisa de 5 pisões na cabeça.
 
 O primeiro pernil, que sai dos blocos, muda o cão para a segunda forma e aguenta um golpe extra. Pegar outro pernil nessa forma ativa o super poder por 15 segundos (a barra aparece embaixo do placar). Levar dano tira o pernil e o super poder.
 
