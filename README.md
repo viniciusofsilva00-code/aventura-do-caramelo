@@ -12,7 +12,7 @@ Jogo de plataforma 2D no estilo 8-bit. Escolha um dos três cães e atravesse o 
 | Médio | quantidade normal | libera o Trovão |
 | Difícil | quase o dobro | libera a Nevasca |
 
-Os cães liberados ficam salvos no navegador.
+Os cães liberados ficam salvos no navegador. Também existe um código secreto, digitado na tela inicial, que libera todos de uma vez.
 
 ## Personagens
 

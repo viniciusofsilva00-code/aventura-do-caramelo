@@ -189,6 +189,7 @@ const CHARS=[
   {name:"TROVÃO",breed:"PASTOR",form:"POLICIAL",sup:"LATIDO SÔNICO",supHint:"LATIDOS DERRUBAM INIMIGOS",vel:3,pulo:2,max:2.5,jump:6.2,hold:.28,f:dogSet(PASTOR_TOP,PASTOR_LEGS,"b"),fp:dogSet(PASTOR_TOP,PASTOR_LEGS,"b",COP)},
   {name:"NEVASCA",breed:"HUSKY",form:"GELO",sup:"CONGELAR",supHint:"ENCOSTE NOS CONGELADOS",vel:3,pulo:3,max:2.5,jump:6.5,hold:.27,f:dogSet(HUSKY_TOP,HUSKY_LEGS,"g"),fp:dogSet(HUSKY_TOP,HUSKY_LEGS,"g",FROST)}];
 for(const c of CHARS){c.fg=glow(c.fp);c.sil=glow(c.f,"Q");}
+const SECRET="LLRRLRLR";
 const MODES=[["FÁCIL","MENOS INIMIGOS"],["MÉDIO","INIMIGOS NORMAIS"],["DIFÍCIL","MAIS INIMIGOS"]];
 // Cães liberados ficam salvos no navegador
 const SAVE_KEY="aventura-do-caramelo-liberados";
@@ -316,7 +317,7 @@ function toggleFull(){try{if(document.fullscreenElement)document.exitFullscreen(
 addEventListener("resize",fit);addEventListener("orientationchange",fit);addEventListener("load",fit);fit();
 
 // ================= ESTADO =================
-const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,char:0,diff:1,newUnlock:-1,pauseSel:0,t:0,cardT:0,stateT:0,cam:0};
+const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,code:"",secretT:0,secretMsg:"",char:0,diff:1,newUnlock:-1,pauseSel:0,t:0,cardT:0,stateT:0,cam:0};
 let map=[],cols=0,rows=0,theme=THEMES[0],ents=[],plats=[],items=[],parts=[],pops=[],house=null,bumps={},P=null,frameT=0,combo=0;
 const CH=()=>CHARS[G.char];
 const SOLID="#B?PU";
@@ -469,7 +470,12 @@ function updFx(){for(const p of parts){p.vy+=.15;p.x+=p.vx;p.y+=p.vy;p.t--;}part
 // ================= LOOP =================
 function update(){
   const st=G.state;G.stateT>0&&G.stateT--;if(G.shake>0)G.shake--;
-  if(st==="title"){if(enterEdge||jumpEdge){SFX.bark();G.state="select";G.stateT=12;}}
+  if(st==="title"){
+    // Código secreto na tela inicial: ← ← → → ← → ← → (setas, A/D ou botões de toque) libera todos os cães
+    if(leftEdge||rightEdge){G.code=(G.code+(leftEdge?"L":"R")).slice(-8);
+      if(G.code===SECRET){G.code="";const n=[3,4,5].filter(i=>unlock(i)).length;G.secretT=150;G.secretMsg=n?"TODOS OS CÃES LIBERADOS!":"JÁ ESTÁ TUDO LIBERADO";SFX.life();}}
+    if(G.secretT>0)G.secretT--;
+    if(enterEdge||jumpEdge){SFX.bark();G.state="select";G.stateT=12;}}
   else if(st==="select"){
     if(leftEdge){G.char=(G.char+5)%6;tone(660,660,.05);}
     if(rightEdge){G.char=(G.char+1)%6;tone(660,660,.05);}
@@ -612,7 +618,8 @@ function render(){
     txt("PULE NOS GATOS E ROBÔS!",128,116,"y","center");
     const tt=performance.now()/16;for(let i=0;i<3;i++){ctx.save();ctx.translate(52+i*60,176);ctx.scale(2,2);
       const f=CHARS[i].f[Math.floor((tt+i*20)/10)%2];ctx.drawImage(f.r,-1,-1);ctx.restore();}
-    if(blink())txt(isTouch?"TOQUE EM START":"APERTE ENTER",128,148,"W","center");
+    if(G.secretT>0){drawPanel(24,140,208,20);txt(G.secretMsg,128,146,G.secretT%20<10?"y":"W","center");}
+    else if(blink())txt(isTouch?"TOQUE EM START":"APERTE ENTER",128,148,"W","center");
     txt(isTouch?"":"F: TELA CHEIA",8,228,"b");txt("M: SOM",248,228,"b","right");return;}
   if(st==="select"){
     drawBG(0,200);ui();txt("ESCOLHA SEU CÃO",128,8,"W","center",true);const now=performance.now();
