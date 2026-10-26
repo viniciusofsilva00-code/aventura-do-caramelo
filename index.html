@@ -154,10 +154,28 @@ function dogSet(top,legs,collar,ov){return legs.map(l=>{let rows=top.concat(l);
     let out="";for(let i=0;i<16;i++)out+=(o[i]&&o[i]!==".")?o[i]:(r[i]||".");return out;});
   return spr(rows);});}
 // Silhueta dourada usada como aura do super poder
-const glow=frames=>frames.map(f=>{const c=document.createElement("canvas");c.width=f.r.width;c.height=f.r.height;const x=c.getContext("2d");
-  x.drawImage(f.r,0,0);x.globalCompositeOperation="source-in";x.fillStyle=PAL.y;x.fillRect(0,0,c.width,c.height);
+const glow=(frames,col="y")=>frames.map(f=>{const c=document.createElement("canvas");c.width=f.r.width;c.height=f.r.height;const x=c.getContext("2d");
+  x.drawImage(f.r,0,0);x.globalCompositeOperation="source-in";x.fillStyle=PAL[col];x.fillRect(0,0,c.width,c.height);
   const l=document.createElement("canvas");l.width=c.width;l.height=c.height;const y=l.getContext("2d");y.translate(c.width,0);y.scale(-1,1);y.drawImage(c,0,0);
   return {r:c,l,w:f.w,h:f.h};});
+const POODLE_TOP=[
+"................","................","...........WWW..","..........WWWWW.","..........WWWWW.","..........qWKWW.",
+".WW.......qWWWWK","WWWW......qWWWW.",".WW......ppWWW..","...WWWWWWWWWW...","..WWWWWWWWWWWW..","...WWWWWWWWWW..."];
+const POODLE_LEGS=[["....W......W....","....W......W....","...WW.....WW....","...KK.....KK...."],
+  ["....W.......W...","...W.........W..","..WW.........WW.","..KK.........KK."],["...W.........W..","..W...........W.",".WW...........WW","................"]];
+const PASTOR_TOP=[
+"................","................","...........k..k.","..........kOkkO.","..........OOOOO.","..........OKOOOO",
+".k........kOOOOK","kk........kkOOk.",".k.......bbOOO..","..kkkkkkkkkOO...","..kkkkkkkOOOO...","..OOOOOOOOOOO..."];
+const PASTOR_LEGS=[["...OO......OO...","...OO......OO...","...OO......OO...","...KK......KK..."],
+  ["..OO........OO..",".OO..........OO.",".OO..........OO.",".KK..........KK."],["..OOOOOOOOOOO...",".OO..........OO.","OO............OO","................"]];
+const HUSKY_TOP=[
+"................","................","...........q..q.","..........qq.qq.","..........qqqqq.","..........qsWsq.",
+".q........WWWWWK","qq........WWWWW.","qq.......ggWWW..",".qqqqqqqqqqqW...","..qqqqqqqqqWW...","..WWWWWWWWWWW..."];
+const HUSKY_LEGS=[["...qW......qW...","...qW......qW...","...WW......WW...","...KK......KK..."],
+  ["..qW........qW..",".qW..........qW.",".WW..........WW.",".KK..........KK."],["..qqqqqqqqqqW...",".qW..........qW.","WW............WW","................"]];
+const BOW={1:"..........p.p...",2:"..........ppp...",10:"..pppppppppppp.."};
+const COP={1:"...........nnnn.",2:"..........nnynnn",9:"...nnnnnnn......"};
+const FROST={2:"..........bbbbb.",3:"..........bWbWb.",9:"......bbb.......",10:"...bbb.........."};
 const CAPE={7:"........rr......",8:"......rrr.......",9:"...rrrrrr.......",10:".rrrrrr.........",11:"rrrr............"};
 const PILOT={5:"...........qqq..",6:"..........qqqqq.",7:"...........sWs..",9:"......WWW.......",10:"...WWW.........."};
 const ROYAL={2:"..........y.y.y.",3:"..........yyyyy.",9:"......ppp.......",10:"...pppppp.......",11:".ppppp..........",12:"pp.............."};
@@ -165,8 +183,19 @@ const ROYAL={2:"..........y.y.y.",3:"..........yyyyy.",9:"......ppp.......",10:"
 const CHARS=[
   {name:"CARAMELO",breed:"VIRA-LATA",form:"CAPA DE HERÓI",sup:"VOO",supHint:"SEGURE O PULO NO AR",vel:2,pulo:2,max:2.2,jump:6.2,hold:.28,f:dogSet(DOG_TOP,DOG_LEGS,"r"),fp:dogSet(DOG_TOP,DOG_LEGS,"r",CAPE)},
   {name:"PAÇOCA",breed:"SALSICHA",form:"PILOTO",sup:"TURBO",supHint:"ATROPELA OS INIMIGOS",vel:3,pulo:1,max:2.5,jump:5.9,hold:.28,f:dogSet(PACOCA_TOP,PACOCA_LEGS,"s"),fp:dogSet(PACOCA_TOP,PACOCA_LEGS,"s",PILOT)},
-  {name:"PIPOCA",breed:"PUG",form:"REALEZA",sup:"TERREMOTO",supHint:"ATERRISSE PERTO DELES",vel:1,pulo:3,max:1.95,jump:6.6,hold:.27,f:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n"),fp:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n",ROYAL)}];
-for(const c of CHARS)c.fg=glow(c.fp);
+  {name:"PIPOCA",breed:"PUG",form:"REALEZA",sup:"TERREMOTO",supHint:"ATERRISSE PERTO DELES",vel:1,pulo:3,max:1.95,jump:6.6,hold:.27,f:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n"),fp:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n",ROYAL)},
+  // Liberados ao vencer o jogo: Floquinho no fácil, Trovão no médio, Nevasca no difícil
+  {name:"FLOQUINHO",breed:"POODLE",form:"BAILARINA",sup:"PULO TRIPLO",supHint:"PULE DE NOVO NO AR",vel:2,pulo:2,max:2.2,jump:6.3,hold:.28,f:dogSet(POODLE_TOP,POODLE_LEGS,"p"),fp:dogSet(POODLE_TOP,POODLE_LEGS,"p",BOW)},
+  {name:"TROVÃO",breed:"PASTOR",form:"POLICIAL",sup:"LATIDO SÔNICO",supHint:"LATIDOS DERRUBAM INIMIGOS",vel:3,pulo:2,max:2.5,jump:6.2,hold:.28,f:dogSet(PASTOR_TOP,PASTOR_LEGS,"b"),fp:dogSet(PASTOR_TOP,PASTOR_LEGS,"b",COP)},
+  {name:"NEVASCA",breed:"HUSKY",form:"GELO",sup:"CONGELAR",supHint:"ENCOSTE NOS CONGELADOS",vel:3,pulo:3,max:2.5,jump:6.5,hold:.27,f:dogSet(HUSKY_TOP,HUSKY_LEGS,"g"),fp:dogSet(HUSKY_TOP,HUSKY_LEGS,"g",FROST)}];
+for(const c of CHARS){c.fg=glow(c.fp);c.sil=glow(c.f,"Q");}
+const MODES=[["FÁCIL","MENOS INIMIGOS"],["MÉDIO","INIMIGOS NORMAIS"],["DIFÍCIL","MAIS INIMIGOS"]];
+// Cães liberados ficam salvos no navegador
+const SAVE_KEY="aventura-do-caramelo-liberados";
+const unlocked=[true,true,true,false,false,false];
+try{JSON.parse(localStorage.getItem(SAVE_KEY)||"[]").forEach(i=>{if(i>=0&&i<6)unlocked[i]=true;});}catch(e){}
+function unlock(i){if(unlocked[i])return false;unlocked[i]=true;
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(unlocked.map((u,k)=>u?k:-1).filter(k=>k>=0)));}catch(e){}return true;}
 const SUPER_TIME=900; // 15 s
 const CAT_TOP=[
 "................","................","................","................",
@@ -241,7 +270,7 @@ const SFX={
 
 // ================= ENTRADA =================
 const keys={},touch={l:false,r:false,j:false};
-let jumpEdge=false,enterEdge=false,leftEdge=false,rightEdge=false,navEdge=false,confirmEdge=false;
+let jumpEdge=false,enterEdge=false,leftEdge=false,rightEdge=false,navEdge=false,confirmEdge=false,upEdge=false,downEdge=false,escEdge=false;
 const JUMPK=["Space","KeyW","ArrowUp"];
 addEventListener("keydown",e=>{
   if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Space"].includes(e.code))e.preventDefault();
@@ -250,7 +279,9 @@ addEventListener("keydown",e=>{
   if(e.code==="Enter"||e.code==="NumpadEnter")enterEdge=true;
   if(["ArrowUp","ArrowDown","KeyW","KeyS","ArrowLeft","ArrowRight","KeyA","KeyD"].includes(e.code))navEdge=true;
   if(["Enter","NumpadEnter","Space"].includes(e.code))confirmEdge=true;
-  if(e.code==="Escape"&&G.state==="play")enterEdge=true;
+  if(e.code==="Escape"){if(G.state==="play")enterEdge=true;escEdge=true;}
+  if(e.code==="ArrowUp"||e.code==="KeyW")upEdge=true;
+  if(e.code==="ArrowDown"||e.code==="KeyS")downEdge=true;
   if(e.code==="ArrowLeft"||e.code==="KeyA")leftEdge=true;
   if(e.code==="ArrowRight"||e.code==="KeyD")rightEdge=true;
   if(e.code==="KeyM")muted=!muted;
@@ -285,7 +316,7 @@ function toggleFull(){try{if(document.fullscreenElement)document.exitFullscreen(
 addEventListener("resize",fit);addEventListener("orientationchange",fit);addEventListener("load",fit);fit();
 
 // ================= ESTADO =================
-const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,char:0,pauseSel:0,t:0,cardT:0,stateT:0,cam:0};
+const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,char:0,diff:1,newUnlock:-1,pauseSel:0,t:0,cardT:0,stateT:0,cam:0};
 let map=[],cols=0,rows=0,theme=THEMES[0],ents=[],plats=[],items=[],parts=[],pops=[],house=null,bumps={},P=null,frameT=0,combo=0;
 const CH=()=>CHARS[G.char];
 const SOLID="#B?PU";
@@ -305,7 +336,13 @@ function loadLevel(i){
     else if(ch==="H")house={x:c*TS,y:(r+1)*TS-32,w:32,h:32};
     else keep=true;
     if(!keep)map[r][c]=".";}
-  P={x:sx,y:sy,w:12,h:14,vx:0,vy:0,face:1,onGround:false,coyote:0,jbuf:0,ride:null,inv:0,power:false,sup:0,anim:0,prevB:0,hidden:false};G.shake=0;
+  // Modo: fácil mantém metade dos inimigos; difícil põe um inimigo extra perto de cada um (tipo alternado)
+  if(G.diff===0)ents=ents.filter((e,i)=>i%2===0);
+  else if(G.diff===2){const extra=[];for(const e of ents){const tx=Math.floor(e.x/TS)+(e.type==="cat"?3:-3),ty=Math.floor((e.y+e.h-1)/TS);
+      if(tx>4&&tx<cols-4&&tx*TS>sx+80&&!solid(tx,ty)&&solid(tx,ty+1)&&!(house&&Math.abs(tx*TS-house.x)<80)){
+        const t=e.type==="cat"?"vac":"cat",h=t==="cat"?12:10;extra.push({type:t,x:tx*TS+2,y:(ty+1)*TS-h,w:t==="cat"?12:14,h,vx:t==="cat"?-.55:-.95,vy:0,active:false,dead:0});}}
+    ents=ents.concat(extra);}
+  P={x:sx,y:sy,w:12,h:14,vx:0,vy:0,face:1,onGround:false,coyote:0,jbuf:0,ride:null,inv:0,power:false,sup:0,airJ:0,barkT:0,anim:0,prevB:0,hidden:false};G.shake=0;
   G.time=L.time||300;G.t=0;G.cam=0;updCam();}
 
 function toCard(i,fresh){
@@ -349,7 +386,12 @@ function updPlayer(){
   P.vx=Math.max(-MAXV,Math.min(MAXV,P.vx));
   if(jumpEdge)P.jbuf=6;else if(P.jbuf>0)P.jbuf--;
   if(P.onGround)P.coyote=6;else if(P.coyote>0)P.coyote--;
+  if(P.onGround)P.airJ=2;
   if(P.jbuf>0&&P.coyote>0){P.vy=-(sp&&id===2?8.2:C.jump);P.jbuf=0;P.coyote=0;P.ride=null;SFX.jump();}
+  else if(sp&&id===3&&jumpEdge&&!P.onGround&&P.airJ>0){ // PULO TRIPLO: mais dois pulos no ar
+    P.airJ--;P.vy=-C.jump*.95;P.jbuf=0;tone(500,1000,.1);for(let i=0;i<6;i++)parts.push({x:P.x+6,y:P.y+P.h,vx:(i-2.5)*.5,vy:.5,t:14,col:i%2?"p":"W"});}
+  if(sp&&id===4&&--P.barkT<=0){ // LATIDO SÔNICO: onda automática para a frente
+    P.barkT=40;items.push({type:"wave",x:P.x+(P.face>0?P.w:-8),y:P.y-2,w:8,h:16,vx:4*P.face,t:45});SFX.bark();}
   if(sp&&id===0&&inp.j&&!P.onGround){ // VOO: segurar o pulo no ar sustenta e sobe
     P.vy=P.vy<-2.4?P.vy+C.hold:Math.max(-2.4,P.vy-.45);if(P.y<-20){P.y=-20;P.vy=Math.max(P.vy,0);}
     if(frameT%3===0)parts.push({x:P.x+(P.face>0?0:12),y:P.y+10,vx:-P.face*.6,vy:.6,t:16,col:frameT%6?"r":"y"});}
@@ -379,9 +421,11 @@ function quake(){G.shake=14;tone(90,40,.35,"sawtooth",.12);tone(160,60,.2,"squar
 function pFrame(){return G.state==="dying"||!P.onGround?2:P.anim>0?Math.floor(P.anim)%2:0;}
 
 function updEnts(){
-  for(const e of ents){
+  const frozen=P&&P.sup>0&&G.char===5; // CONGELAR: inimigos param
+  for(const e of ents){e.frozen=false;
     if(e.dead){if(--e.dead<=0)e.gone=true;if(e.flip){e.vy+=.3;e.y+=e.vy;if(e.vx)e.x+=e.vx*.5;}continue;}
     if(!e.active){if(e.x<G.cam+W+24)e.active=true;else continue;}
+    if(frozen){e.frozen=true;continue;}
     e.vy=Math.min(6,e.vy+.5);
     if(moveX(e,e.vx))e.vx=-e.vx;
     e.onGround=false;moveY(e,e.vy);
@@ -392,6 +436,8 @@ function updEnts(){
 function updItems(){
   for(const it of items){
     if(it.type==="bone"){if(overlap(P,it)){it.gone=true;addBones(1);addScore(10);SFX.bone();puff(it.x+6,it.y+4,"W",4);}}
+    else if(it.type==="wave"){it.x+=it.vx;if(--it.t<=0||solid(Math.floor((it.x+4)/TS),Math.floor((it.y+8)/TS)))it.gone=true;
+      for(const e of ents)if(e.active&&!e.dead&&overlap(it,e)){e.dead=40;e.flip=true;e.vy=-4;addScore(200,e.x,e.y-8);puff(e.x+6,e.y+6,"s",6);}}
     else if(it.type==="pop"){it.y-=1.4;if(--it.t<=0){it.gone=true;puff(it.x+6,it.y+4,"y",5);}}
     else if(it.type==="treat"){
       if(it.rise>0){it.y-=.5;it.rise-=.5;}
@@ -403,6 +449,8 @@ function updItems(){
 
 function collide(){
   for(const e of ents){if(e.dead||!e.active||!overlap(P,e))continue;
+    if(e.frozen){e.dead=40;e.flip=true;e.vy=-3;addScore(200,e.x,e.y-8);tone(1400,700,.12,"triangle",.08);
+      for(let i=0;i<8;i++)parts.push({x:e.x+6,y:e.y+4,vx:(Math.random()-.5)*3,vy:-Math.random()*3,t:22,col:i%2?"b":"W"});continue;}
     if(P.sup>0&&G.char===1){e.dead=40;e.flip=true;e.vy=-4;e.vx=P.vx;addScore(200,e.x,e.y-8);SFX.stomp();puff(e.x+6,e.y+6,"y",6);continue;}
     if(P.vy>0&&(P.prevB<=e.y+6||P.y+P.h<=e.y+e.h/2+3)){
       e.dead=30;e.flip=false;combo++;const pts=100*Math.min(8,1<<(combo-1));addScore(pts,e.x,e.y-8);
@@ -423,9 +471,15 @@ function update(){
   const st=G.state;G.stateT>0&&G.stateT--;if(G.shake>0)G.shake--;
   if(st==="title"){if(enterEdge||jumpEdge){SFX.bark();G.state="select";G.stateT=12;}}
   else if(st==="select"){
-    if(leftEdge){G.char=(G.char+2)%3;tone(660,660,.05);}
-    if(rightEdge){G.char=(G.char+1)%3;tone(660,660,.05);}
-    if((enterEdge||jumpEdge)&&G.stateT<=0){SFX.bark();newGame();}}
+    if(leftEdge){G.char=(G.char+5)%6;tone(660,660,.05);}
+    if(rightEdge){G.char=(G.char+1)%6;tone(660,660,.05);}
+    if(upEdge||downEdge){G.char=(G.char+3)%6;tone(660,660,.05);}
+    if(confirmEdge&&G.stateT<=0){if(unlocked[G.char]){SFX.bark();G.state="mode";G.stateT=10;}else tone(160,120,.15,"square",.08);}}
+  else if(st==="mode"){
+    if(upEdge||leftEdge){G.diff=(G.diff+2)%3;tone(660,660,.05);}
+    if(downEdge||rightEdge){G.diff=(G.diff+1)%3;tone(660,660,.05);}
+    if(escEdge){G.state="select";G.stateT=10;}
+    else if(confirmEdge&&G.stateT<=0){SFX.bark();newGame();}}
   else if(st==="card"){if(--G.cardT<=0)G.state="play";}
   else if(st==="pause"){
     if(navEdge){G.pauseSel=1-G.pauseSel;tone(660,660,.05);}
@@ -442,11 +496,11 @@ function update(){
     updFx();if(P.x<house.x+10)P.x+=.8;if(P.x>house.x+10)P.x-=.8;P.hidden=G.stateT<30;
     if(G.time>0){if(G.stateT<=0){const d=Math.min(3,G.time);G.time-=d;addScore(10*d);if(G.time%9===0)tone(880,880,.03,"square",.03);}}
     else if(G.stateT<=-50){const n=G.level;
-      if(n<LEVELS.length-1)toCard(n+1,true);else{G.state="win";G.stateT=40;SFX.life();}}
+      if(n<LEVELS.length-1)toCard(n+1,true);else{G.state="win";G.stateT=40;SFX.life();G.newUnlock=unlock(3+G.diff)?3+G.diff:-1;}}
     if(G.time<=0&&G.stateT>-60)G.stateT--;}
   else if(st==="over"){if((enterEdge||jumpEdge)&&G.stateT<=0)newGame();}
-  else if(st==="win"){updFx();if((enterEdge||jumpEdge)&&G.stateT<=0){G.state="title";G.stateT=20;}}
-  jumpEdge=false;enterEdge=false;leftEdge=false;rightEdge=false;navEdge=false;confirmEdge=false;}
+  else if(st==="win"){updFx();if((enterEdge||jumpEdge)&&G.stateT<=0){G.state="title";G.stateT=20;G.newUnlock=-1;}}
+  jumpEdge=false;enterEdge=false;leftEdge=false;rightEdge=false;navEdge=false;confirmEdge=false;upEdge=false;downEdge=false;escEdge=false;}
 
 // ================= DESENHO =================
 const R2=(x,y,w,h,col)=>{ctx.fillStyle=PAL[col];ctx.fillRect(Math.round(x),Math.round(y),w,h);};
@@ -507,11 +561,13 @@ function drawEnts(cx){const f=Math.floor(frameT/10)%2;for(const e of ents){if(!e
   const s=e.type==="cat"?CAT[f]:VAC[Math.floor(frameT/6)%2];const sx=e.x-cx-(16-e.w)/2,sy=e.y+e.h-s.h;
   if(e.dead){if(e.flip){ctx.save();ctx.translate(Math.round(sx)+8,Math.round(sy)+s.h/2);ctx.scale(1,-1);ctx.drawImage(s.r,-9,-s.h/2-1);ctx.restore();}
     else drawSpr(s,sx,sy,e.vx<0,Math.max(4,Math.round(s.h/3)));}
-  else drawSpr(s,sx,sy,e.vx<0);}}
+  else{drawSpr(s,sx,sy,e.vx<0);if(e.frozen){ctx.globalAlpha=.55;R2(sx-1,sy+s.h-e.h-3,18,e.h+4,"b");ctx.globalAlpha=1;R2(sx-1,sy+s.h-e.h-3,18,1,"W");}}}}
 
 function drawItems(cx){for(const it of items){
   if(it.type==="bone")drawSpr(BONE,it.x-cx-1,it.y+Math.round(Math.sin((frameT+it.bob)/12)*1.5),false);
   else if(it.type==="pop")drawSpr(BONE,it.x-cx-1,it.y,false);
+  else if(it.type==="wave"){const x=Math.round(it.x-cx),d=it.vx>0?1:-1,k=(45-it.t)/45;
+    for(let a=0;a<3;a++){const ox=x+d*a*4,hh=6+a*4,c=a===1?"s":"W";R2(ox,it.y+8-hh,2,hh*2,c);R2(ox-d*2,it.y+8-hh-1,2,2,c);R2(ox-d*2,it.y+8+hh-1,2,2,c);}}
   else if(it.type==="treat")drawSpr(TREAT,it.x-cx,it.y+3,it.vx<0);}}
 
 function drawPlayer(cx){if(P.hidden)return;if(P.inv>0&&Math.floor(P.inv/4)%2)return;
@@ -559,21 +615,33 @@ function render(){
     if(blink())txt(isTouch?"TOQUE EM START":"APERTE ENTER",128,148,"W","center");
     txt(isTouch?"":"F: TELA CHEIA",8,228,"b");txt("M: SOM",248,228,"b","right");return;}
   if(st==="select"){
-    drawBG(0,200);ui();txt("ESCOLHA SEU CÃO",128,18,"W","center",true);
-    for(let i=0;i<3;i++){const c=CHARS[i],x=8+i*82,y=40,sel=i===G.char;
-      drawPanel(x,y,76,124);if(sel){R2(x-1,y-1,78,2,"y");R2(x-1,y+123,78,2,"y");R2(x-1,y-1,2,126,"y");R2(x+75,y-1,2,126,"y");}
-      const bob=sel?-Math.round(Math.abs(Math.sin(performance.now()/160))*4):0,pw=sel&&Math.floor(performance.now()/1500)%2===1;
-      ctx.save();ctx.translate(x+22,y+12+bob);ctx.scale(2,2);ctx.drawImage((pw?c.fp:c.f)[sel?Math.floor(performance.now()/140)%2:0].r,-1,-1);ctx.restore();
-      txt(c.name,x+38,y+56,sel?"y":"W","center");txt(pw?"+PERNIL":c.breed,x+38,y+68,pw?"o":"b","center");
-      txt("VEL",x+6,y+90,"W");txt("PULO",x+6,y+106,"W");
-      for(let k=0;k<3;k++){R2(x+42+k*10,y+90,8,8,"K");R2(x+43+k*10,y+91,6,6,k<c.vel?"o":"Q");
-        R2(x+42+k*10,y+106,8,8,"K");R2(x+43+k*10,y+107,6,6,k<c.pulo?"g":"Q");}}
-    drawPanel(8,170,240,62);txt("1 PERNIL: "+CH().form,128,176,"o","center");
-    txt("2 PERNIS: SUPER "+CH().sup,128,188,"y","center");
-    txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS ESCOLHEM",128,204,"W","center");
-    if(!isTouch)txt("ENTER CONFIRMA",128,216,"W","center");return;}
+    drawBG(0,200);ui();txt("ESCOLHA SEU CÃO",128,8,"W","center",true);const now=performance.now();
+    for(let i=0;i<6;i++){const c=CHARS[i],x=8+i*40,y=30,sel=i===G.char,lk=!unlocked[i];
+      drawPanel(x,y,38,42);if(sel){R2(x-1,y-1,40,2,"y");R2(x-1,y+41,40,2,"y");R2(x-1,y-1,2,44,"y");R2(x+37,y-1,2,44,"y");}
+      const img=lk?c.sil[0]:c.f[sel?Math.floor(now/140)%2:0];const bob=sel&&!lk?-Math.round(Math.abs(Math.sin(now/160))*3):0;
+      ctx.save();ctx.translate(x+1,y+4+bob);ctx.scale(2,2);ctx.drawImage(img.r,0,0);ctx.restore();
+      if(lk)txt("?",x+19,y+16,"W","center");}
+    const c=CH(),lk=!unlocked[G.char];drawPanel(8,80,240,96);
+    if(lk){txt("???",128,92,"W","center",true);txt("VENÇA O JOGO NO MODO",128,124,"W","center");
+      txt(MODES[G.char-3][0],128,138,"y","center");txt("PARA LIBERAR",128,152,"W","center");}
+    else{const pw=Math.floor(now/1500)%2===1;
+      txt(c.name,18,88,"y");txt(c.breed,18,100,"b");
+      ctx.save();ctx.translate(196,84);ctx.scale(2,2);ctx.drawImage((pw?c.fp:c.f)[Math.floor(now/140)%2].r,0,0);ctx.restore();
+      if(pw)txt("+PERNIL",212,124,"o","center");
+      txt("VEL",18,116,"W");txt("PULO",18,128,"W");
+      for(let k=0;k<3;k++){R2(56+k*10,116,8,8,"K");R2(57+k*10,117,6,6,k<c.vel?"o":"Q");R2(56+k*10,128,8,8,"K");R2(57+k*10,129,6,6,k<c.pulo?"g":"Q");}
+      txt("1 PERNIL: "+c.form,18,144,"o");txt("2 PERNIS: SUPER "+c.sup,18,156,"y");txt(c.supHint,18,166,"b");}
+    drawPanel(8,180,240,18);txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS ESCOLHEM · ENTER OK",128,185,"W","center");return;}
+  if(st==="mode"){
+    drawBG(1,200);ui();txt("ESCOLHA O MODO",128,10,"W","center",true);
+    MODES.forEach((m,i)=>{const y=34+i*48,sel=G.diff===i,u=3+i,c=CHARS[u];drawPanel(16,y,224,42);
+      if(sel){R2(15,y-1,226,2,"y");R2(15,y+41,226,2,"y");R2(15,y-1,2,44,"y");R2(239,y-1,2,44,"y");}
+      txt(m[0],26,y+7,sel?"y":"W");txt(m[1],26,y+19,"b");txt(unlocked[u]?"LIBERADO: "+c.name:"PRÊMIO: CÃO SECRETO",26,y+30,unlocked[u]?"g":"o");
+      ctx.drawImage((unlocked[u]?c.f[0]:c.sil[0]).r,212,y+12);});
+    drawPanel(8,178,240,34);txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS · ENTER OK · ESC VOLTA",128,184,"W","center");
+    txt("VENÇA E LIBERE O PRÊMIO",128,198,"b","center");return;}
   if(st==="card"){R2(0,0,W,H,"K");ui();const L=LEVELS[G.level];
-    txt("FASE "+(G.level+1),128,80,"W","center",true);txt(L.name+" · "+L.sub,128,104,"o","center");
+    txt("FASE "+(G.level+1),128,80,"W","center",true);txt("MODO "+MODES[G.diff][0],128,214,"b","center");txt(L.name+" · "+L.sub,128,104,"o","center");
     ctx.drawImage(HEART.r,100,136);txt("x "+G.lives,112,136,"W");ctx.drawImage(BONE_S.r,100,152);txt("x "+pad(G.bones,2),112,152,"W");
     txt(pad(G.score,6)+" PONTOS",128,176,"b","center");
     txt("VIDA EXTRA EM "+(BONES_PER_LIFE*(G.lifeMark+1)-G.bones)+" OSSOS",128,196,"Q","center");
@@ -587,10 +655,11 @@ function render(){
     txt(pad(G.snap.score,6)+" PONTOS",128,128,"b","center");txt("A JORNADA RECOMEÇA",128,156,"W","center");
     if(blink())txt((isTouch?"START":"ENTER")+": VOLTAR À FASE 1",128,172,"y","center");}
   if(st==="win"){ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle="rgba(11,11,26,.7)";ctx.fillRect(0,0,W,H);ui();drawPanel(24,44,208,150);
-    txt("VITÓRIA!",128,56,"y","center",true);txt(CH().name,128,82,"o","center");txt("MISSÃO CUMPRIDA!",128,94,"W","center");
-    txt("PONTOS  "+pad(G.score,6),128,116,"W","center");txt("OSSOS   "+pad(G.bones,6),128,130,"W","center");
-    drawDog(G.char,120,150,{hop:1,pw:1},performance.now()/16);
-    if(blink())txt(isTouch?"START: JOGAR DE NOVO":"ENTER: JOGAR DE NOVO",128,178,"y","center");
+    txt("VITÓRIA!",128,54,"y","center",true);txt(CH().name+" · "+MODES[G.diff][0],128,76,"o","center");txt("MISSÃO CUMPRIDA!",128,88,"W","center");
+    txt("PONTOS  "+pad(G.score,6),128,104,"W","center");txt("OSSOS   "+pad(G.bones,6),128,116,"W","center");
+    const nu=G.newUnlock;if(nu>=0){txt("NOVO CÃO LIBERADO:",128,132,"y","center");txt(CHARS[nu].name,128,142,"g","center");}
+    drawDog(G.char,nu>=0?100:120,160,{hop:1,pw:1},performance.now()/16);if(nu>=0)drawDog(nu,140,160,{hop:1,f:1},performance.now()/16+20);
+    if(blink())txt(isTouch?"START: JOGAR DE NOVO":"ENTER: JOGAR DE NOVO",128,182,"y","center");
     if(frameT%3===0)parts.push({x:G.cam+Math.random()*W,y:-4,vx:(Math.random()-.5),vy:1,t:200,col:["y","r","o","W","s"][frameT%5]});}}
 
 let last=performance.now(),acc=0;
