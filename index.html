@@ -59,37 +59,37 @@ body.touch #pad{display:flex}
 // S início  H casinha (chegada)
 const LEVELS=[
 {name:"QUINTAL", sub:"DIA", theme:0, time:300, map:[
-  "........................................................",
-  "........................................................",
-  "........................................................",
-  "........................................................",
-  "........................................................",
-  "........................................................",
-  "........................................................",
-  "........................................................",
-  "........B?P?B.........oooo............?.?....oo.........",
-  "........................................................",
-  "..................oo..BBBB........oo.........##.........",
-  ".....ooo....................................###.........",
-  "..S............c.............c.............####...c.H...",
-  "##################..##############..####################",
-  "##################..##############..####################"]},
-{name:"PARQUE", sub:"ENTARDECER", theme:1, time:300, map:[
-  "............................................................",
-  "............................................................",
-  "............................................................",
-  "............................................................",
-  "............................................................",
-  "............................................................",
-  ".............................................ooo............",
-  "............................................................",
-  "........?B?.........?P?......oooo...oooo.?..........BB?BB...",
-  ".....................................c......................",
-  "...............ooo..................BBBB....................",
-  "......ooo..............ooo...<...............^..............",
-  "..S.........m.............m...............m........m.c..H...",
-  "###############...##########......##########.....###########",
-  "###############...##########......##########.....###########"]},
+  "........................................................................................................................................................................",
+  "........................................................................................................................................................................",
+  "........................................................................................................................................................................",
+  "........................................................................................................................................................................",
+  "........................................................................................................................................................................",
+  "........................................................................................................................................................................",
+  "........................................................................................................................................................................",
+  "....................................................................................................ooo........................ooo......................................",
+  "........B?P?B.........oooo............?.?....oo...........B?B..............ooooo..........?B?B?...............B?P?B.........................?B?............oo...........",
+  "...............................................................................................................................BBB......................................",
+  "..................oo..BBBB........oo.........##.......................oo...BBBBB......oo...........#..................oo...BBB........oo...................##...........",
+  ".....ooo....................................###...............ooo.................................##......................................................###...........",
+  "..S............c.............c.............####...c.............c...............c...c...........c###........c......c..............c.............c.....c..####.....c.H...",
+  "##################..##############..##################################..##############..############...###############..##############..################################",
+  "##################..##############..##################################..##############..############...###############..##############..################################"]},
+{name:"PARQUE", sub:"ENTARDECER", theme:1, time:400, map:[
+  "....................................................................................................................................................................................",
+  "....................................................................................................................................................................................",
+  "....................................................................................................................................................................................",
+  "....................................................................................................................................................................................",
+  "....................................................................................................................................................................................",
+  "....................................................................................................................................................................................",
+  ".............................................ooo.......................................................ooo..........................................................................",
+  "....................................................................................................................................................................................",
+  "........?B?.........?P?......oooo...oooo.?..........BB?BB.....?B?.......ooo....oooo...........B?P?B.........................?B?......oooo..................?B?...........BB?BB......",
+  ".....................................c...........................................................................c..................................................................",
+  "...............ooo..................BBBB.......................................BBBB......ooo....................BBBB...ooo............................ooo...........................",
+  "......ooo..............ooo...<...............^....................ooo...<..............................^.............................<............................^.................",
+  "..S.........m.............m...............m........m.c..........m................c....m............m..........c......m........m...............c..m..m.....................c..m..H...",
+  "###############...##########......##########.....######################......############...##########.....############...##########......############...########.....##############",
+  "###############...##########......##########.....######################......############...##########.....############...##########......############...########.....##############"]},
 {name:"CIDADE", sub:"NOITE", theme:2, time:450, map:[
   "................................................................................................................................................................................................",
   "................................................................................................................................................................................................",
@@ -101,86 +101,12 @@ const LEVELS=[
   "..............................ooo.......................................................oooo..B?P?B.........ooo............?B?...................................ooo..........oooo..............",
   ".....................ooo.?P?............ooo......................................ooo..................ooo.......c......................................................ooo......................",
   "..........ooo.................................................................c...............................####...................<.......ooo..........m.c.m.................................",
-  ".....ooo.......m..c...........<.....c.m................m..c..H...........^..#####.......<.......m...c...####..####........m..c...m..................^..##########.............<.......c..m...H..",
+  ".....ooo.......m..c...........<.....c.m................m..c..............^..#####.......<.......m...c...####..####........m..c...m..................^..##########.............<.......c..m...H..",
   "..S..........########.............######.....c..^..#####################....#####...........##########..####..####...###############.......c...####....##########...####...c......##############",
   "##########...########...#####.....######...####....#####################....#####..####.....##########..####..####...###############.....####..####....##########...####..###.....##############",
   "##########...########...#####.....######...####....#####################....#####..####.....##########..####..####...###############.....####..####....##########...####..###.....##############",
   "##########...########...#####.....######...####....#####################....#####..####.....##########..####..####...###############.....####..####....##########...####..###.....##############"]}
 ];
-
-// ================= HISTÓRIAS =================
-// Uma história por cão: intro, ch (antes de cada fase), af (depois das fases 1 e 2), ep (final).
-// a = atores da cena: k tipo (H herói, cat, vac, kennel, pernil, medal), x posição, f virado, run/hop/pw animação e forma
-const STORIES=[
- { // CARAMELO
-  intro:[
-   {bg:0,a:[{k:"H",x:70,run:1},{k:"cat",x:170,f:1}],
-    t:"Caramelo é um vira-lata da Vila Esperança. Dorme onde dá: embaixo do banco da praça, na porta da padaria, atrás do muro do vizinho."},
-   {bg:0,a:[{k:"H",x:60},{k:"kennel",x:150}],
-    t:"Um dia, um pombo fofoqueiro contou: no alto da cidade existe uma casinha vazia, com cobertor e pote cheio, esperando um dono de quatro patas."}],
-  ch:[
-   {bg:0,title:"CAPÍTULO 1 · O QUINTAL",a:[{k:"H",x:60,run:1},{k:"cat",x:150,f:1}],
-    t:"O caminho começa pelo quintal dos gatos. Eles não gostam de visita, mas Caramelo não tem medo de miado."},
-   {bg:1,title:"CAPÍTULO 2 · O PARQUE",a:[{k:"H",x:50,run:1},{k:"vac",x:160,f:1}],
-    t:"No parque, os robôs-aspiradores fazem a faxina do fim da tarde e engolem tudo o que encontram. Melhor pular por cima deles."},
-   {bg:2,title:"CAPÍTULO 3 · OS TELHADOS",a:[{k:"H",x:40,run:1},{k:"pernil",x:120},{k:"cat",x:170,f:1}],
-    t:"A última parte é a mais longa: telhado depois de telhado, até o prédio mais alto. Um pernil no caminho vira capa de herói."}],
-  af:[
-   {bg:0,a:[{k:"kennel",x:120},{k:"H",x:90,hop:1}],
-    t:"Na primeira casinha, só um bilhete roído: SIGA ATÉ O PARQUE. A casinha de verdade ainda está longe."},
-   {bg:1,a:[{k:"kennel",x:120},{k:"H",x:90,hop:1}],
-    t:"Do alto do escorregador, Caramelo avistou os telhados. A casinha está lá em cima, sob a lua."}],
-  ep:[
-   {bg:2,a:[{k:"kennel",x:110},{k:"H",x:80,hop:1,pw:1}],
-    t:"Lá estava ela: a casinha, com um cobertor xadrez e uma plaquinha pintada à mão. Estava escrito CARAMELO."},
-   {bg:2,a:[{k:"kennel",x:110},{k:"H",x:146}],
-    t:"Caramelo deu três voltas, deitou e suspirou. Depois de tanto chão, finalmente tinha um lar. FIM."}]},
- { // PAÇOCA
-  intro:[
-   {bg:0,a:[{k:"H",x:90,run:1},{k:"medal",x:160}],
-    t:"Paçoca é a salsicha mais rápida da Vila Esperança. Ganhou três vezes a Corrida da Vila, sempre de orelhas ao vento."},
-   {bg:1,a:[{k:"cat",x:110},{k:"medal",x:140}],
-    t:"Na véspera da corrida, o gato Bigode roubou a medalha de ouro e espalhou as pistas pela cidade. Sem medalha, sem corrida!"}],
-  ch:[
-   {bg:0,title:"CAPÍTULO 1 · O QUINTAL",a:[{k:"H",x:60,run:1},{k:"cat",x:160,f:1}],
-    t:"Pegadas de gato levam ao quintal do vizinho. Paçoca fareja o chão e dispara: ninguém alcança uma salsicha decidida."},
-   {bg:1,title:"CAPÍTULO 2 · O PARQUE",a:[{k:"H",x:50,run:1},{k:"vac",x:160,f:1}],
-    t:"No parque, os robôs da faxina bloqueiam a pista. Paçoca precisa ser rápida e saltar na hora certa."},
-   {bg:2,title:"CAPÍTULO 3 · OS TELHADOS",a:[{k:"H",x:40,run:1,pw:1},{k:"cat",x:170,f:1}],
-    t:"O Bigode fugiu para o telhado mais alto da cidade. É o trecho mais longo da jornada. Com um pernil, Paçoca vira piloto de corrida."}],
-  af:[
-   {bg:0,a:[{k:"kennel",x:120},{k:"H",x:90}],
-    t:"Na casinha, um recado do Bigode: SE QUER A MEDALHA, ME PEGUE NO PARQUE."},
-   {bg:1,a:[{k:"kennel",x:120},{k:"H",x:90},{k:"vac",x:160,f:1}],
-    t:"A medalha não estava no parque. Mas um robô, cheio de poeira, cuspiu outra pista: um mapa dos telhados."}],
-  ep:[
-   {bg:2,a:[{k:"kennel",x:120},{k:"H",x:84,hop:1,pw:1},{k:"medal",x:160},{k:"cat",x:184,f:1}],
-    t:"No último telhado, a medalha brilhava ao lado da casinha. O Bigode, sem fôlego, desistiu da fuga."},
-   {bg:0,a:[{k:"H",x:96,hop:1},{k:"medal",x:126},{k:"cat",x:170,f:1}],
-    t:"Na manhã seguinte, Paçoca venceu a Corrida da Vila pela quarta vez. O Bigode assistiu tudo da primeira fila. FIM."}]},
- { // PIPOCA
-  intro:[
-   {bg:1,a:[{k:"H",x:104,hop:1}],
-    t:"Pipoca é um pug famoso, estrela do comercial de ração Crocante Feliz. Mas, de tanta ração de mentirinha, nunca provou comida de verdade."},
-   {bg:2,a:[{k:"H",x:70},{k:"pernil",x:140}],
-    t:"No estúdio, contavam a lenda do Pernil Dourado, guardado no telhado mais alto da cidade. Pipoca fugiu da gravação na mesma hora."}],
-  ch:[
-   {bg:0,title:"CAPÍTULO 1 · O QUINTAL",a:[{k:"H",x:60,hop:1},{k:"cat",x:160,f:1}],
-    t:"Primeira parada: o quintal dos gatos. Pipoca não corre muito, mas pula mais alto que qualquer cão da vila."},
-   {bg:1,title:"CAPÍTULO 2 · O PARQUE",a:[{k:"H",x:50,run:1},{k:"vac",x:160,f:1}],
-    t:"No parque, os robôs da faxina aspiram tudo, até petisco caído no chão. Pipoca precisa chegar antes deles."},
-   {bg:2,title:"CAPÍTULO 3 · OS TELHADOS",a:[{k:"H",x:40,hop:1,pw:1},{k:"pernil",x:180}],
-    t:"Telhado após telhado, sob a lua. O caminho é longo, mas lá no alto há um brilho dourado. Será o pernil?"}],
-  af:[
-   {bg:0,a:[{k:"kennel",x:120},{k:"H",x:90},{k:"cat",x:160,f:1}],
-    t:"Na casinha, um gato velho jurou ter sentido cheiro de pernil vindo do parque. A barriga de Pipoca roncou."},
-   {bg:1,a:[{k:"kennel",x:120},{k:"H",x:90,hop:1}],
-    t:"Os robôs não acharam o Pernil Dourado. Ele estava mesmo nos telhados, lá onde só se chega pulando."}],
-  ep:[
-   {bg:2,a:[{k:"kennel",x:130},{k:"H",x:70,pw:1},{k:"pernil",x:100},{k:"cat",x:170,f:1}],
-    t:"Era o Pernil Dourado, enorme e cheiroso. Pipoca ia dar a primeira mordida quando viu os gatos olhando, com fome."},
-   {bg:2,a:[{k:"H",x:70,hop:1,pw:1},{k:"pernil",x:100},{k:"cat",x:140,f:1},{k:"cat",x:170,f:1}],
-    t:"Pipoca dividiu o pernil com todo mundo. Naquela noite ganhou algo melhor que fama: amigos. FIM."}]}];
 
 // ================= PALETA (16 cores) =================
 const PAL={K:"#0b0b1a",W:"#f8f8f0",k:"#1a1c3a",n:"#3a3f7a",s:"#78b8f8",b:"#c4e4fc",o:"#f89838",O:"#a85820",
@@ -332,7 +258,7 @@ bindBtn("bJ",()=>{touch.j=true;jumpEdge=true;},()=>touch.j=false);
 bindBtn("bS",()=>{enterEdge=true;});
 bindBtn("bF",()=>toggleFull());
 document.addEventListener("fullscreenchange",()=>setTimeout(fit,50));
-cv.addEventListener("pointerdown",()=>{audioOn();if(["title","over","win","story","select"].includes(G.state))enterEdge=true;});
+cv.addEventListener("pointerdown",()=>{audioOn();if(["title","over","win","select"].includes(G.state))enterEdge=true;});
 addEventListener("blur",()=>{if(G.state==="play"){G.state="pause";}for(const k in keys)keys[k]=false;touch.l=touch.r=touch.j=false;});
 const isTouch=matchMedia("(pointer: coarse)").matches||"ontouchstart" in window;
 if(isTouch)document.body.classList.add("touch");
@@ -349,11 +275,9 @@ function toggleFull(){try{if(document.fullscreenElement)document.exitFullscreen(
 addEventListener("resize",fit);addEventListener("orientationchange",fit);addEventListener("load",fit);fit();
 
 // ================= ESTADO =================
-const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,char:0,t:0,cardT:0,stateT:0,cam:0,pages:[],page:0,storyT:0,after:null};
+const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,char:0,t:0,cardT:0,stateT:0,cam:0};
 let map=[],cols=0,rows=0,theme=THEMES[0],ents=[],plats=[],items=[],parts=[],pops=[],house=null,bumps={},P=null,frameT=0,combo=0;
 const CH=()=>CHARS[G.char];
-const ST=()=>STORIES[G.char];
-const fill=t=>t;
 const SOLID="#B?PU";
 function solid(c,r){if(c<0||c>=cols)return true;if(r<0||r>=rows)return false;return SOLID.includes(map[r][c]);}
 
@@ -377,10 +301,8 @@ function loadLevel(i){
 function toCard(i,fresh){
   if(fresh)G.snap={score:G.score,bones:G.bones};else{G.score=G.snap.score;G.bones=G.snap.bones;}
   G.level=i;loadLevel(i);G.state="card";G.cardT=150;}
-function story(pages,after){G.pages=pages;G.page=0;G.storyT=0;G.after=after;G.state="story";}
-// Recomeço sempre na fase 1; o prólogo só aparece quando se escolhe o cão
-function newGame(withIntro){G.lives=3;G.score=0;G.bones=0;G.lifeMark=0;
-  if(withIntro)story(ST().intro.concat(ST().ch[0]),()=>toCard(0,true));else toCard(0,true);}
+// Recomeço sempre na fase 1
+function newGame(){G.lives=3;G.score=0;G.bones=0;G.lifeMark=0;toCard(0,true);}
 
 // Vida extra a cada 20 ossos (máximo de 9 vidas). lifeMark não volta ao morrer, então repetir a fase não rende vida de novo
 const BONES_PER_LIFE=20;
@@ -477,12 +399,7 @@ function update(){
   else if(st==="select"){
     if(leftEdge){G.char=(G.char+2)%3;tone(660,660,.05);}
     if(rightEdge){G.char=(G.char+1)%3;tone(660,660,.05);}
-    if((enterEdge||jumpEdge)&&G.stateT<=0){SFX.bark();newGame(true);}}
-  else if(st==="story"){G.storyT++;
-    if(enterEdge||jumpEdge){const len=fill(G.pages[G.page].t).length;
-      if(G.storyT*1.5<len)G.storyT=999;
-      else if(++G.page>=G.pages.length)G.after();
-      else{G.storyT=0;tone(520,520,.04);}}}
+    if((enterEdge||jumpEdge)&&G.stateT<=0){SFX.bark();newGame();}}
   else if(st==="card"){if(--G.cardT<=0)G.state="play";}
   else if(st==="pause"){if(enterEdge){G.state="play";SFX.pause();}}
   else if(st==="play"){
@@ -497,10 +414,9 @@ function update(){
     updFx();if(P.x<house.x+10)P.x+=.8;if(P.x>house.x+10)P.x-=.8;P.hidden=G.stateT<30;
     if(G.time>0){if(G.stateT<=0){const d=Math.min(3,G.time);G.time-=d;addScore(10*d);if(G.time%9===0)tone(880,880,.03,"square",.03);}}
     else if(G.stateT<=-50){const n=G.level;
-      if(n<LEVELS.length-1)story([ST().af[n],ST().ch[n+1]],()=>toCard(n+1,true));
-      else story(ST().ep,()=>{G.state="win";G.stateT=40;SFX.life();});}
+      if(n<LEVELS.length-1)toCard(n+1,true);else{G.state="win";G.stateT=40;SFX.life();}}
     if(G.time<=0&&G.stateT>-60)G.stateT--;}
-  else if(st==="over"){if((enterEdge||jumpEdge)&&G.stateT<=0)newGame(false);}
+  else if(st==="over"){if((enterEdge||jumpEdge)&&G.stateT<=0)newGame();}
   else if(st==="win"){updFx();if((enterEdge||jumpEdge)&&G.stateT<=0){G.state="title";G.stateT=20;}}
   jumpEdge=false;enterEdge=false;leftEdge=false;rightEdge=false;}
 
@@ -593,23 +509,9 @@ function drawWorld(){const cx=G.cam;drawBG(theme===THEMES[0]?0:theme===THEMES[1]
   for(const p of parts)R2(p.x-cx,p.y,2,2,p.col);for(const p of pops)txt(p.s,p.x-cx,p.y,"W");}
 
 const blink=()=>Math.floor(performance.now()/450)%2===0;
-function wrap(s,n=27){const out=[];let line="";for(const w of s.split(" ")){if(line&&(line+" "+w).length>n){out.push(line);line=w;}else line=line?line+" "+w:w;}if(line)out.push(line);return out;}
 function drawDog(i,x,y,o={},t=0){const fr=o.pw?CHARS[i].fp:CHARS[i].f;let f=0,dy=0;
   if(o.run)f=Math.floor(t/7)%2;if(o.hop){const ph=Math.abs(Math.sin(t/9));dy=-Math.round(ph*7);f=ph>.2?2:0;}
   drawSpr(fr[f],x,y+dy,!!o.f);}
-function drawMedal(x,y){R2(x+2,y,3,6,"r");R2(x+7,y,3,6,"s");disc(x+6,y+10,5,"K");disc(x+6,y+10,4,"y");R2(x+5,y+8,2,4,"o");}
-function drawScene(pg,t){
-  ctx.save();ctx.beginPath();ctx.rect(16,16,224,84);ctx.clip();ctx.translate(16,-100);
-  drawBG(pg.bg,[40,120,300][pg.bg]);const th=THEMES[pg.bg];for(let x=0;x<240;x+=16)ctx.drawImage(th.top,x,184);
-  for(const a of pg.a){
-    if(a.k==="H")drawDog(G.char,a.x,168,a,t+a.x);
-    else if(a.k==="pernil")drawSpr(TREAT,a.x,173+Math.round(Math.sin(t/10)*2),false);
-    else if(a.k==="medal")drawMedal(a.x,166);
-    else if(a.k==="cat")drawSpr(CAT[Math.floor(t/12)%2],a.x,168,!!a.f);
-    else if(a.k==="vac")drawSpr(VAC[Math.floor(t/6)%2],a.x,174,!!a.f);
-    else if(a.k==="kennel")drawKennel(a.x,152);}
-  ctx.restore();
-  R2(15,15,226,1,"W");R2(15,100,226,1,"W");R2(15,15,1,86,"W");R2(240,15,1,86,"W");}
 function render(){
   ctx.imageSmoothingEnabled=false;ctx.setTransform(1,0,0,1,0,0);const st=G.state,ox=Math.floor((W-256)/2);
   const ui=()=>ctx.setTransform(1,0,0,1,ox,0);
@@ -636,12 +538,6 @@ function render(){
     drawPanel(8,172,240,48);txt("COM PERNIL: "+CH().form,128,180,"o","center");
     txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS ESCOLHEM",128,194,"W","center");
     if(!isTouch)txt("ENTER CONFIRMA",128,206,"W","center");return;}
-  if(st==="story"){R2(0,0,W,H,"K");ui();const pg=G.pages[G.page];drawScene(pg,performance.now()/16);
-    let y=110;if(pg.title){txt(pg.title,128,y,"y","center");y+=16;}
-    let left=Math.floor(G.storyT*1.5);
-    for(const line of wrap(fill(pg.t).toUpperCase())){if(left<=0)break;txt(line.slice(0,left),20,y,"W");left-=line.length+1;y+=11;}
-    if(G.storyT*1.5>=fill(pg.t).length&&blink())txt((isTouch?"PULO":"ENTER")+" >",236,226,"y","right");
-    txt((G.page+1)+"/"+G.pages.length,20,226,"Q");return;}
   if(st==="card"){R2(0,0,W,H,"K");ui();const L=LEVELS[G.level];
     txt("FASE "+(G.level+1),128,80,"W","center",true);txt(L.name+" · "+L.sub,128,104,"o","center");
     ctx.drawImage(HEART.r,100,136);txt("x "+G.lives,112,136,"W");ctx.drawImage(BONE_S.r,100,152);txt("x "+pad(G.bones,2),112,152,"W");
