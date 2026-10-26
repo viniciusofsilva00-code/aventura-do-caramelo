@@ -1,6 +1,21 @@
 # Aventura do Caramelo
 
-Jogo de plataforma 2D no estilo 8-bit: um vira-lata caramelo atravessa o quintal, o parque e os telhados da cidade até a casinha.
+Jogo de plataforma 2D no estilo 8-bit. Na noite de São João, os fogos assustam os três cães da Vó Lurdes e cada um foge para um canto da cidade. Você escolhe um deles e atravessa o quintal, o parque e os telhados para reunir a matilha e voltar para casa.
+
+## Personagens
+
+| Cão | Raça | Velocidade | Pulo |
+|---|---|---|---|
+| Caramelo | vira-lata | média | médio |
+| Paçoca | salsicha | alta | baixo |
+| Pipoca | pug | baixa | alto |
+
+Os amigos resgatados seguem você nas fases seguintes.
+
+## Regras
+
+- Vida extra aos 5.000, 12.000 e 20.000 pontos, e depois a cada 10.000 (também a cada 50 ossos). Máximo de 9 vidas.
+- Perdeu todas as vidas: a jornada recomeça na fase 1.
 
 **Jogar:** https://viniciusofsilva00-code.github.io/aventura-do-caramelo/
 

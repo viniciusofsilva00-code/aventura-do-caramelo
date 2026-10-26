@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Aventura do Caramelo</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
@@ -108,6 +109,37 @@ const LEVELS=[
   "##########...########...#####.....######...####....#############"]}
 ];
 
+// ================= HISTÓRIA =================
+// {H} = cão escolhido, {A} e {B} = os outros dois. a = atores da cena: k tipo, x posição, f virado, run/hop animação
+const INTRO=[
+ {bg:0,a:[{k:"home",x:8},{k:"vo",x:84},{k:"c0",x:112},{k:"c1",x:140},{k:"c2",x:168}],
+  t:"Vila Esperança, noite de São João. Na casa amarela da Vó Lurdes vivem três cães: Caramelo, Paçoca e Pipoca."},
+ {bg:2,fx:"fogos",a:[{k:"c0",x:40,f:1,run:1},{k:"c1",x:104,run:1},{k:"c2",x:170,run:1}],
+  t:"Quando os fogos estouraram, o vento abriu o portão. Assustados, os três correram, cada um para um canto da cidade."},
+ {bg:1,a:[{k:"cat",x:56},{k:"vac",x:150,f:1}],
+  t:"Lá fora, os gatos do Bigode mandam nos quintais. E os robôs-aspiradores da prefeitura varrem as ruas, levando tudo o que encontram."},
+ {bg:0,a:[{k:"H",x:104,hop:1}],
+  t:"{H} parou, farejou o ar e sentiu o cheiro do bolo de fubá da vó. Hora de juntar a matilha e voltar para casa!"}];
+const CHAPTER=[
+ {bg:0,title:"CAPÍTULO 1 · O QUINTAL",a:[{k:"H",x:60},{k:"cat",x:150,f:1},{k:"kennel",x:186}],
+  t:"O quintal do vizinho é território dos gatos. Pelo cheiro, {A} se escondeu numa casinha no fim do terreno."},
+ {bg:1,title:"CAPÍTULO 2 · O PARQUE",a:[{k:"H",x:50,run:1},{k:"A",x:28,run:1},{k:"vac",x:160,f:1}],
+  t:"No parque, ao entardecer, começa a faxina dos robôs. O vigia viu {B} correndo atrás de um pombo, rumo à casinha perto do lago."},
+ {bg:2,title:"CAPÍTULO 3 · OS TELHADOS",a:[{k:"H",x:70,run:1},{k:"A",x:48,run:1},{k:"B",x:26,run:1},{k:"cat",x:170,f:1}],
+  t:"Na cidade, as ruas estão cheias de robôs. O jeito é seguir pelos telhados, sob a lua. Cuidado: o Bigode e sua turma estão de tocaia."}];
+const FOUND=[
+ {bg:0,a:[{k:"kennel",x:120},{k:"H",x:92,hop:1},{k:"A",x:156,hop:1}],
+  t:"Na casinha, {A} tremia de medo. - Achei você! Vem comigo, a vó está esperando. Mas onde se meteu {B}?"},
+ {bg:1,a:[{k:"kennel",x:120},{k:"H",x:72,hop:1},{k:"A",x:94},{k:"B",x:156,hop:1}],
+  t:"{B} estava na casinha, roendo um graveto. A matilha está junta de novo! Agora só falta achar o caminho de casa."}];
+const EPILOGUE=[
+ {bg:2,a:[{k:"home",x:120},{k:"vo",x:96},{k:"H",x:52,run:1},{k:"A",x:30,run:1},{k:"B",x:8,run:1}],
+  t:"Do último telhado, {H}, {A} e {B} avistaram a casa amarela. A Vó Lurdes esperava no portão, de lanterna na mão."},
+ {bg:2,a:[{k:"home",x:120},{k:"vo",x:96},{k:"H",x:66,hop:1},{k:"A",x:44,hop:1},{k:"B",x:22,hop:1}],
+  t:"- Meus amores! Naquela noite teve banho morno, bolo de fubá e um osso novinho para cada um."},
+ {bg:2,a:[{k:"home",x:120},{k:"cat",x:196,f:1},{k:"H",x:88},{k:"A",x:66},{k:"B",x:44}],
+  t:"E o Bigode? Ficou olhando do muro, sozinho. Dizem que agora ele dorme na casinha também. FIM."}];
+
 // ================= PALETA (16 cores) =================
 const PAL={K:"#0b0b1a",W:"#f8f8f0",k:"#1a1c3a",n:"#3a3f7a",s:"#78b8f8",b:"#c4e4fc",o:"#f89838",O:"#a85820",
   y:"#f8d878",g:"#48a838",G:"#206830",r:"#d83838",p:"#c86890",q:"#7c7c8c",Q:"#44465a",t:"#e8b888"};
@@ -138,8 +170,26 @@ const DOG_LEGS=[
 ["...ooooooooooo..","...oO......oO...","...oO......oO...","...KK......KK..."],
 ["...ooooooooooo..","..oO........oO..",".oO..........oO.",".KK..........KK."],
 ["..oooooooooooo..",".oO..........oO.","oO............oO","................"]];
-const dogFrames=pw=>DOG_LEGS.map(l=>spr(DOG_TOP.concat(l),true,pw?{r:"y"}:null));
-const DOG=dogFrames(false),DOGP=dogFrames(true);
+const PACOCA_TOP=[
+"................","................","................","................","................",
+"...........OOO..","..........OOOOO.","..........KOKOOO","O.........KOOOOK",".O.......ssOOO..",
+"..OoooooooooO...",".OOOOOOOOOOOO...",".OOOOOOOOOOOOt..","..tttttttttt...."];
+const PACOCA_LEGS=[["..OK......OK....","..KK......KK...."],[".OK........OK...",".KK........KK..."],["OK..........OK..","................"]];
+const PIPOCA_TOP=[
+"................","................","................","................",
+"..........KK.KK.","..........ttttt.","..........tKtKtt","..........KKKKKt","...tt.....tKpKt.",
+"..t..t...nntttt.","...tttttttttttt.","..ttttttttttttt.","..tttttttttttt.."];
+const PIPOCA_LEGS=[["...tO......tO...","...tO......tO...","...KK......KK..."],["..tO........tO..",".tO..........tO.",".KK..........KK."],[".tO..........tO.","tO............tO","................"]];
+const dogSet=(top,legs,collar,pw)=>legs.map(l=>spr(top.concat(l),true,pw?{[collar]:"y"}:null));
+// Personagens: max = velocidade máxima, jump = impulso do pulo, hold = gravidade com o botão segurado
+const CHARS=[
+  {name:"CARAMELO",breed:"VIRA-LATA",vel:2,pulo:2,max:2.2,jump:6.2,hold:.28,f:dogSet(DOG_TOP,DOG_LEGS,"r"),fp:dogSet(DOG_TOP,DOG_LEGS,"r",1)},
+  {name:"PAÇOCA",breed:"SALSICHA",vel:3,pulo:1,max:2.5,jump:5.9,hold:.28,f:dogSet(PACOCA_TOP,PACOCA_LEGS,"s"),fp:dogSet(PACOCA_TOP,PACOCA_LEGS,"s",1)},
+  {name:"PIPOCA",breed:"PUG",vel:1,pulo:3,max:1.95,jump:6.6,hold:.27,f:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n"),fp:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n",1)}];
+const VO=spr([
+"...WWWWW....","..WWWWWWW...","..WttttttW..","..tKKtKKt...","..tttttttt..","...ttppt....","....tttt....",
+"..pppppppp..",".pppWpppppp.","tppppppWppt.","tpppppppppt.","tppWppppppt.",".pppppppWpp.",".pppppppppp.",
+"..pppppppp..","..pppppppp..","...tt..tt...","...KK..KK..."]);
 const CAT_TOP=[
 "................","................","................","................",
 "..........Q...Q.","..........QQ.QQ.","..........qqqqq.","Q.........qyqyq.",
@@ -213,13 +263,15 @@ const SFX={
 
 // ================= ENTRADA =================
 const keys={},touch={l:false,r:false,j:false};
-let jumpEdge=false,enterEdge=false;
+let jumpEdge=false,enterEdge=false,leftEdge=false,rightEdge=false;
 const JUMPK=["Space","KeyW","ArrowUp"];
 addEventListener("keydown",e=>{
   if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Space"].includes(e.code))e.preventDefault();
   audioOn();if(e.repeat)return;keys[e.code]=true;
   if(JUMPK.includes(e.code))jumpEdge=true;
   if(e.code==="Enter"||e.code==="NumpadEnter")enterEdge=true;
+  if(e.code==="ArrowLeft"||e.code==="KeyA")leftEdge=true;
+  if(e.code==="ArrowRight"||e.code==="KeyD")rightEdge=true;
   if(e.code==="KeyM")muted=!muted;});
 addEventListener("keyup",e=>{keys[e.code]=false;});
 const held=()=>({l:keys.ArrowLeft||keys.KeyA||touch.l, r:keys.ArrowRight||keys.KeyD||touch.r, j:JUMPK.some(k=>keys[k])||touch.j});
@@ -228,11 +280,11 @@ function bindBtn(id,on,off){const el=document.getElementById(id);
   const up=()=>{el.classList.remove("on");off&&off();};
   ["pointerup","pointercancel","lostpointercapture"].forEach(t=>el.addEventListener(t,up));
   el.addEventListener("contextmenu",e=>e.preventDefault());}
-bindBtn("bL",()=>touch.l=true,()=>touch.l=false);
-bindBtn("bR",()=>touch.r=true,()=>touch.r=false);
+bindBtn("bL",()=>{touch.l=true;leftEdge=true;},()=>touch.l=false);
+bindBtn("bR",()=>{touch.r=true;rightEdge=true;},()=>touch.r=false);
 bindBtn("bJ",()=>{touch.j=true;jumpEdge=true;},()=>touch.j=false);
 bindBtn("bS",()=>{enterEdge=true;});
-cv.addEventListener("pointerdown",()=>{audioOn();if(["title","over","win"].includes(G.state))enterEdge=true;});
+cv.addEventListener("pointerdown",()=>{audioOn();if(["title","over","win","story","select"].includes(G.state))enterEdge=true;});
 addEventListener("blur",()=>{if(G.state==="play"){G.state="pause";}for(const k in keys)keys[k]=false;touch.l=touch.r=touch.j=false;});
 const isTouch=matchMedia("(pointer: coarse)").matches||"ontouchstart" in window;
 if(isTouch)document.body.classList.add("touch");
@@ -246,8 +298,11 @@ function fit(){
 addEventListener("resize",fit);addEventListener("orientationchange",fit);addEventListener("load",fit);fit();
 
 // ================= ESTADO =================
-const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,t:0,cardT:0,stateT:0,cam:0};
-let map=[],cols=0,rows=0,theme=THEMES[0],ents=[],plats=[],items=[],parts=[],pops=[],house=null,bumps={},P=null,frameT=0,combo=0;
+const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,scoreMark:0,char:0,t:0,cardT:0,stateT:0,cam:0,pages:[],page:0,storyT:0,after:null};
+let map=[],cols=0,rows=0,theme=THEMES[0],ents=[],plats=[],items=[],parts=[],pops=[],house=null,bumps={},P=null,frameT=0,combo=0,trail=[];
+const CH=()=>CHARS[G.char];
+const friends=()=>[0,1,2].filter(i=>i!==G.char);
+const fill=t=>t.replace(/\{H\}/g,CH().name).replace(/\{A\}/g,CHARS[friends()[0]].name).replace(/\{B\}/g,CHARS[friends()[1]].name);
 const SOLID="#B?PU";
 function solid(c,r){if(c<0||c>=cols)return true;if(r<0||r>=rows)return false;return SOLID.includes(map[r][c]);}
 
@@ -266,15 +321,22 @@ function loadLevel(i){
     else keep=true;
     if(!keep)map[r][c]=".";}
   P={x:sx,y:sy,w:12,h:14,vx:0,vy:0,face:1,onGround:false,coyote:0,jbuf:0,ride:null,inv:0,power:false,anim:0,prevB:0,hidden:false};
-  G.time=300;G.t=0;G.cam=0;updCam();}
+  trail=[];G.time=300;G.t=0;G.cam=0;updCam();}
 
 function toCard(i,fresh){
   if(fresh)G.snap={score:G.score,bones:G.bones};else{G.score=G.snap.score;G.bones=G.snap.bones;}
   G.level=i;loadLevel(i);G.state="card";G.cardT=150;}
-function newGame(){G.lives=3;G.score=0;G.bones=0;G.lifeMark=0;toCard(0,true);}
+function story(pages,after){G.pages=pages;G.page=0;G.storyT=0;G.after=after;G.state="story";}
+// Recomeço sempre na fase 1; o prólogo só aparece quando se escolhe o cão
+function newGame(withIntro){G.lives=3;G.score=0;G.bones=0;G.lifeMark=0;G.scoreMark=0;
+  if(withIntro)story(INTRO.concat(CHAPTER[0]),()=>toCard(0,true));else toCard(0,true);}
 
-function addScore(n,x,y){G.score+=n;if(x!==undefined)pops.push({x,y,t:40,s:String(n)});}
-function addBones(n){G.bones+=n;const m=Math.floor(G.bones/50);if(m>G.lifeMark){G.lifeMark=m;G.lives++;SFX.life();pops.push({x:P.x,y:P.y-10,t:60,s:"1UP"});}}
+// Vida extra por pontuação: 5.000, 12.000, 20.000 e depois a cada 10.000 (máximo de 9 vidas)
+const lifeAt=k=>k<3?[5000,12000,20000][k]:20000+(k-2)*10000;
+function gainLife(){if(G.lives<9)G.lives++;SFX.life();if(P)pops.push({x:P.x-4,y:P.y-12,t:70,s:"1UP"});}
+function addScore(n,x,y){G.score+=n;if(x!==undefined)pops.push({x,y,t:40,s:String(n)});
+  while(G.score>=lifeAt(G.scoreMark)){G.scoreMark++;gainLife();}}
+function addBones(n){G.bones+=n;const m=Math.floor(G.bones/50);if(m>G.lifeMark){G.lifeMark=m;gainLife();}}
 function puff(x,y,col,n=6){for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*2.4,vy:-Math.random()*2.2,t:20+Math.random()*12,col});}
 
 // ================= FÍSICA =================
@@ -295,9 +357,8 @@ function bump(c,r){const ch=map[r][c];bumps[r+","+c]=10;
   else if(ch==="P"){map[r][c]="U";items.push({type:"treat",x:c*TS+2,y:r*TS,w:12,h:12,vx:.7,vy:0,rise:16});SFX.sprout();}
   else SFX.bump();}
 
-const MAXV=2.2;
 function updPlayer(){
-  const inp=held();
+  const inp=held(),C=CH(),MAXV=C.max;
   if(P.ride){moveX(P,P.ride.dx);P.y+=P.ride.dy;}
   const ax=P.onGround?.15:.1;
   if(inp.l&&!inp.r){P.vx-=P.vx>0?.3:ax;P.face=-1;}
@@ -306,8 +367,8 @@ function updPlayer(){
   P.vx=Math.max(-MAXV,Math.min(MAXV,P.vx));
   if(jumpEdge)P.jbuf=6;else if(P.jbuf>0)P.jbuf--;
   if(P.onGround)P.coyote=6;else if(P.coyote>0)P.coyote--;
-  if(P.jbuf>0&&P.coyote>0){P.vy=-6.2;P.jbuf=0;P.coyote=0;P.ride=null;SFX.jump();}
-  P.vy+=(P.vy<0&&inp.j)?.28:.8;if(P.vy>6)P.vy=6;
+  if(P.jbuf>0&&P.coyote>0){P.vy=-C.jump;P.jbuf=0;P.coyote=0;P.ride=null;SFX.jump();}
+  P.vy+=(P.vy<0&&inp.j)?C.hold:.8;if(P.vy>6)P.vy=6;
   P.prevB=P.y+P.h;
   if(moveX(P,P.vx))P.vx=0;
   P.onGround=false;
@@ -319,7 +380,9 @@ function updPlayer(){
   if(P.onGround)combo=0;
   P.anim=P.onGround&&Math.abs(P.vx)>.3?P.anim+Math.abs(P.vx)*.08:0;
   if(P.inv>0)P.inv--;
+  const lt=trail[trail.length-1];if(!lt||Math.abs(lt.x-P.x)+Math.abs(lt.y-P.y)>.4){trail.push({x:P.x,y:P.y,face:P.face,f:pFrame()});if(trail.length>64)trail.shift();}
   if(P.y>rows*TS+8)die(true);}
+function pFrame(){return G.state==="dying"||!P.onGround?2:P.anim>0?Math.floor(P.anim)%2:0;}
 
 function updEnts(){
   for(const e of ents){
@@ -361,7 +424,16 @@ function updFx(){for(const p of parts){p.vy+=.15;p.x+=p.vx;p.y+=p.vy;p.t--;}part
 // ================= LOOP =================
 function update(){
   const st=G.state;G.stateT>0&&G.stateT--;
-  if(st==="title"){if(enterEdge||jumpEdge){SFX.bark();newGame();}}
+  if(st==="title"){if(enterEdge||jumpEdge){SFX.bark();G.state="select";G.stateT=12;}}
+  else if(st==="select"){
+    if(leftEdge){G.char=(G.char+2)%3;tone(660,660,.05);}
+    if(rightEdge){G.char=(G.char+1)%3;tone(660,660,.05);}
+    if((enterEdge||jumpEdge)&&G.stateT<=0){SFX.bark();newGame(true);}}
+  else if(st==="story"){G.storyT++;
+    if(enterEdge||jumpEdge){const len=fill(G.pages[G.page].t).length;
+      if(G.storyT*1.5<len)G.storyT=999;
+      else if(++G.page>=G.pages.length)G.after();
+      else{G.storyT=0;tone(520,520,.04);}}}
   else if(st==="card"){if(--G.cardT<=0)G.state="play";}
   else if(st==="pause"){if(enterEdge){G.state="play";SFX.pause();}}
   else if(st==="play"){
@@ -375,11 +447,13 @@ function update(){
   else if(st==="clear"){
     updFx();if(P.x<house.x+10)P.x+=.8;if(P.x>house.x+10)P.x-=.8;P.hidden=G.stateT<30;
     if(G.time>0){if(G.stateT<=0){const d=Math.min(3,G.time);G.time-=d;addScore(10*d);if(G.time%9===0)tone(880,880,.03,"square",.03);}}
-    else if(G.stateT<=-50){if(G.level<LEVELS.length-1)toCard(G.level+1,true);else{G.state="win";G.stateT=40;SFX.life();}}
+    else if(G.stateT<=-50){const n=G.level;
+      if(n<LEVELS.length-1)story([FOUND[n],CHAPTER[n+1]],()=>toCard(n+1,true));
+      else story(EPILOGUE,()=>{G.state="win";G.stateT=40;SFX.life();});}
     if(G.time<=0&&G.stateT>-60)G.stateT--;}
-  else if(st==="over"){if((enterEdge||jumpEdge)&&G.stateT<=0){G.lives=3;toCard(G.level,false);}}
+  else if(st==="over"){if((enterEdge||jumpEdge)&&G.stateT<=0)newGame(false);}
   else if(st==="win"){updFx();if((enterEdge||jumpEdge)&&G.stateT<=0){G.state="title";G.stateT=20;}}
-  jumpEdge=false;enterEdge=false;}
+  jumpEdge=false;enterEdge=false;leftEdge=false;rightEdge=false;}
 
 // ================= DESENHO =================
 const R2=(x,y,w,h,col)=>{ctx.fillStyle=PAL[col];ctx.fillRect(Math.round(x),Math.round(y),w,h);};
@@ -423,7 +497,8 @@ function drawTiles(cx){
     else if(ch==="B")img=theme.brick;else if(ch==="?"||ch==="P")img=QBLK[qf];else if(ch==="U")img=UBLK;
     if(img)ctx.drawImage(img,x,y);}}
 
-function drawHouse(cx){if(!house)return;const x=house.x-cx,y=house.y;
+function drawHouse(cx){if(house)drawKennel(house.x-cx,house.y);}
+function drawKennel(x,y){
   R2(x+2,y+13,28,19,"t");for(let j=17;j<32;j+=4)R2(x+2,j+y,28,1,"O");R2(x+2,y+13,1,19,"K");R2(x+29,y+13,1,19,"K");
   for(let j=0;j<14;j++){const hw=3+Math.round(j*1.35);R2(x+16-hw,y+j,hw*2,1,"r");R2(x+16-hw-1,y+j,1,1,"K");R2(x+16+hw,y+j,1,1,"K");}
   R2(x-3,y+13,38,2,"K");R2(x+14,y-1,4,1,"K");
@@ -446,12 +521,18 @@ function drawItems(cx){for(const it of items){
   else if(it.type==="pop")drawSpr(BONE,it.x-cx-1,it.y,false);
   else if(it.type==="treat")drawSpr(TREAT,it.x-cx,it.y+3,it.vx<0);}}
 
+// Amigos resgatados seguem o herói pelo rastro dele
+function drawFollowers(cx){if(G.state==="dying"||!trail.length)return;const fr=friends();
+  for(let k=Math.min(G.level,2);k>=1;k--){const h=trail[Math.max(0,trail.length-1-k*16)];
+    const idle=P.onGround&&Math.abs(P.vx)<.3;drawSpr(CHARS[fr[k-1]].f[idle?0:h.f],h.x-cx-2-(trail.length<k*16?k*14*P.face:0),h.y+P.h-16,h.face<0);}}
 function drawPlayer(cx){if(P.hidden)return;if(P.inv>0&&Math.floor(P.inv/4)%2)return;
-  const set=P.power?DOGP:DOG;let f=0;if(G.state==="dying")f=2;else if(!P.onGround)f=2;else if(P.anim>0)f=Math.floor(P.anim)%2;
-  drawSpr(set[f],P.x-cx-2,P.y+P.h-16,P.face<0);
+  const set=P.power?CH().fp:CH().f;
+  drawSpr(set[pFrame()],P.x-cx-2,P.y+P.h-16,P.face<0);
   if(P.power&&frameT%12<6)R2(P.x-cx+(P.face>0?-3:15),P.y+2+(frameT%24<12?0:6),1,1,"y");}
 
-function txt(s,x,y,col="W",al="left",big){ctx.font=big?FONT.replace("8px","16px"):FONT;ctx.textAlign=al;ctx.textBaseline="top";
+// A fonte não tem algumas maiúsculas acentuadas; troca pela letra sem acento
+const ACC={"Ó":"O","Í":"I","Ê":"E","Ô":"O","Ú":"U","Á":"A","Â":"A","Õ":"O","À":"A"};
+function txt(s,x,y,col="W",al="left",big){s=s.replace(/[ÓÍÊÔÚÁÂÕÀ]/g,c=>ACC[c]);ctx.font=big?FONT.replace("8px","16px"):FONT;ctx.textAlign=al;ctx.textBaseline="top";
   ctx.fillStyle=PAL.K;ctx.fillText(s,x+1,y+1);ctx.fillStyle=PAL[col];ctx.fillText(s,x,y);}
 const pad=(n,l)=>String(Math.max(0,n)).padStart(l,"0");
 function drawHUD(){
@@ -463,34 +544,82 @@ function drawHUD(){
 
 function drawPanel(x,y,w,h){ctx.fillStyle="rgba(11,11,26,.82)";ctx.fillRect(x,y,w,h);R2(x,y,w,1,"W");R2(x,y+h-1,w,1,"W");R2(x,y,1,h,"W");R2(x+w-1,y,1,h,"W");}
 
-function drawWorld(){const cx=G.cam;drawBG(theme===THEMES[0]?0:theme===THEMES[1]?1:2,cx);drawTiles(cx);drawHouse(cx);drawPlats(cx);drawItems(cx);drawEnts(cx);drawPlayer(cx);
+function drawWorld(){const cx=G.cam;drawBG(theme===THEMES[0]?0:theme===THEMES[1]?1:2,cx);drawTiles(cx);drawHouse(cx);drawPlats(cx);drawItems(cx);drawEnts(cx);drawFollowers(cx);drawPlayer(cx);
   for(const p of parts)R2(p.x-cx,p.y,2,2,p.col);for(const p of pops)txt(p.s,p.x-cx,p.y,"W");}
 
 const blink=()=>Math.floor(performance.now()/450)%2===0;
+function wrap(s,n=27){const out=[];let line="";for(const w of s.split(" ")){if(line&&(line+" "+w).length>n){out.push(line);line=w;}else line=line?line+" "+w:w;}if(line)out.push(line);return out;}
+function drawDog(i,x,y,o={},t=0){const fr=CHARS[i].f;let f=0,dy=0;
+  if(o.run)f=Math.floor(t/7)%2;if(o.hop){const ph=Math.abs(Math.sin(t/9));dy=-Math.round(ph*7);f=ph>.2?2:0;}
+  drawSpr(fr[f],x,y+dy,!!o.f);}
+function drawHome(x,y,night){
+  for(let j=0;j<18;j++){const hw=8+Math.round(j*1.4);R2(x+32-hw,y+j,hw*2,1,"r");R2(x+31-hw,y+j,1,1,"K");R2(x+32+hw,y+j,1,1,"K");}
+  R2(x+44,y-2,6,10,"Q");R2(x+3,y+18,58,30,"y");for(let j=y+23;j<y+48;j+=5)R2(x+3,j,58,1,"o");R2(x,y+17,64,2,"K");
+  for(const wx of [9,45]){R2(x+wx,y+25,11,11,"K");R2(x+wx+1,y+26,9,9,night?"y":"b");R2(x+wx+5,y+26,1,9,"K");}
+  R2(x+25,y+27,14,21,"K");R2(x+26,y+28,12,20,"O");R2(x+35,y+38,2,2,"y");}
+function fireworks(t){const B=[[40,128,"y",0],[118,120,"r",24],[196,132,"s",12],[150,142,"W",36]];
+  for(const [bx,by,c,o] of B){const ph=(t+o)%60,r=ph*.6;if(ph>44)continue;
+    for(let i=0;i<10;i++){const a=i/10*Math.PI*2;R2(bx+Math.cos(a)*r,by+Math.sin(a)*r,2,2,c);}}}
+function drawScene(pg,t){
+  ctx.save();ctx.beginPath();ctx.rect(16,16,224,84);ctx.clip();ctx.translate(16,-100);
+  drawBG(pg.bg,[40,120,300][pg.bg]);const th=THEMES[pg.bg];for(let x=0;x<240;x+=16)ctx.drawImage(th.top,x,184);
+  if(pg.fx==="fogos")fireworks(t);
+  const fr=friends(),dogIdx={H:G.char,A:fr[0],B:fr[1],c0:0,c1:1,c2:2};
+  for(const a of pg.a){
+    if(a.k in dogIdx)drawDog(dogIdx[a.k],a.x,168,a,t+a.x);
+    else if(a.k==="cat")drawSpr(CAT[Math.floor(t/12)%2],a.x,168,!!a.f);
+    else if(a.k==="vac")drawSpr(VAC[Math.floor(t/6)%2],a.x,174,!!a.f);
+    else if(a.k==="vo")drawSpr(VO,a.x,166,false);
+    else if(a.k==="home")drawHome(a.x,136,pg.bg===2);
+    else if(a.k==="kennel")drawKennel(a.x,152);}
+  ctx.restore();
+  R2(15,15,226,1,"W");R2(15,100,226,1,"W");R2(15,15,1,86,"W");R2(240,15,1,86,"W");}
 function render(){
   ctx.imageSmoothingEnabled=false;const st=G.state;
   if(st==="title"){
     drawBG(0,(performance.now()/40)%2000);R2(0,208,W,32,"O");ctx.drawImage(THEMES[0].top,0,208);for(let x=0;x<W;x+=16){ctx.drawImage(THEMES[0].top,x,208);ctx.drawImage(THEMES[0].fill,x,224);}
-    txt("AVENTURA DO",128,30,"W","center");txt("CARAMELO",128,44,"o","center",true);
-    const d=DOG[Math.floor(performance.now()/160)%2];ctx.save();ctx.translate(104,132);ctx.scale(3,3);ctx.drawImage(d.r,-1,-1);ctx.restore();
-    drawPanel(20,64,216,62);
-    txt("SETAS OU A/D   ANDAR",30,72,"W");txt("ESPAÇO/W/CIMA  PULAR",30,84,"W");txt("ENTER          PAUSAR",30,96,"W");
-    txt("PULE NOS GATOS E ROBÔS!",128,110,"y","center");
-    if(blink())txt(isTouch?"TOQUE EM START":"APERTE ENTER",128,194,"W","center");
+    txt("AVENTURA DO",128,22,"W","center");txt("CARAMELO",128,36,"o","center",true);txt("E A MATILHA DA VÓ LURDES",128,56,"y","center");
+    drawPanel(20,70,216,62);
+    txt("SETAS OU A/D   ANDAR",30,78,"W");txt("ESPAÇO/W/CIMA  PULAR",30,90,"W");txt("ENTER          PAUSAR",30,102,"W");
+    txt("PULE NOS GATOS E ROBÔS!",128,116,"y","center");
+    const tt=performance.now()/16;for(let i=0;i<3;i++){ctx.save();ctx.translate(52+i*60,176);ctx.scale(2,2);
+      const f=CHARS[i].f[Math.floor((tt+i*20)/10)%2];ctx.drawImage(f.r,-1,-1);ctx.restore();}
+    if(blink())txt(isTouch?"TOQUE EM START":"APERTE ENTER",128,148,"W","center");
     txt("M: SOM",248,228,"b","right");return;}
+  if(st==="select"){
+    drawBG(0,200);txt("ESCOLHA SEU CÃO",128,18,"W","center",true);
+    for(let i=0;i<3;i++){const c=CHARS[i],x=8+i*82,y=46,sel=i===G.char;
+      drawPanel(x,y,76,128);if(sel){R2(x-1,y-1,78,2,"y");R2(x-1,y+127,78,2,"y");R2(x-1,y-1,2,130,"y");R2(x+75,y-1,2,130,"y");}
+      const bob=sel?-Math.round(Math.abs(Math.sin(performance.now()/160))*4):0;
+      ctx.save();ctx.translate(x+22,y+12+bob);ctx.scale(2,2);ctx.drawImage(c.f[sel?Math.floor(performance.now()/140)%2:0].r,-1,-1);ctx.restore();
+      txt(c.name,x+38,y+56,sel?"y":"W","center");txt(c.breed,x+38,y+68,"b","center");
+      txt("VEL",x+6,y+90,"W");txt("PULO",x+6,y+106,"W");
+      for(let k=0;k<3;k++){R2(x+42+k*10,y+90,8,8,"K");R2(x+43+k*10,y+91,6,6,k<c.vel?"o":"Q");
+        R2(x+42+k*10,y+106,8,8,"K");R2(x+43+k*10,y+107,6,6,k<c.pulo?"g":"Q");}}
+    txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS ESCOLHEM",128,190,"W","center");
+    if(!isTouch)txt("ENTER CONFIRMA",128,204,"W","center");return;}
+  if(st==="story"){R2(0,0,W,H,"K");const pg=G.pages[G.page];drawScene(pg,performance.now()/16);
+    let y=110;if(pg.title){txt(pg.title,128,y,"y","center");y+=16;}
+    let left=Math.floor(G.storyT*1.5);
+    for(const line of wrap(fill(pg.t).toUpperCase())){if(left<=0)break;txt(line.slice(0,left),20,y,"W");left-=line.length+1;y+=11;}
+    if(G.storyT*1.5>=fill(pg.t).length&&blink())txt((isTouch?"PULO":"ENTER")+" >",236,226,"y","right");
+    txt((G.page+1)+"/"+G.pages.length,20,226,"Q");return;}
   if(st==="card"){R2(0,0,W,H,"K");const L=LEVELS[G.level];
     txt("FASE "+(G.level+1),128,80,"W","center",true);txt(L.name+" · "+L.sub,128,104,"o","center");
     ctx.drawImage(HEART.r,100,136);txt("x "+G.lives,112,136,"W");ctx.drawImage(BONE_S.r,100,152);txt("x "+pad(G.bones,2),112,152,"W");
-    txt(pad(G.score,6)+" PONTOS",128,176,"b","center");return;}
+    txt(pad(G.score,6)+" PONTOS",128,176,"b","center");
+    txt("VIDA EXTRA EM "+lifeAt(G.scoreMark),128,196,"Q","center");
+    const fr=friends();for(let k=Math.min(G.level,2);k>=1;k--)drawDog(fr[k-1],120-k*20,44,{});drawDog(G.char,120,44,{});return;}
   drawWorld();drawHUD();
   if(st==="pause"){drawPanel(64,96,128,48);txt("PAUSA",128,108,"W","center",true);txt("ENTER CONTINUA",128,128,"b","center");}
   if(st==="clear"){drawPanel(40,72,176,52);txt("CASINHA!",128,82,"y","center",true);txt("BÔNUS DE TEMPO",128,106,"W","center");}
-  if(st==="over"){R2(0,0,W,H,"K");txt("FIM DE JOGO",128,84,"r","center",true);txt("FASE "+(G.level+1)+" · "+LEVELS[G.level].name,128,112,"W","center");
-    txt(pad(G.snap.score,6)+" PONTOS",128,128,"b","center");if(blink())txt(isTouch?"START: JOGAR DE NOVO":"ENTER: JOGAR DE NOVO",128,164,"y","center");}
+  if(st==="over"){R2(0,0,W,H,"K");txt("FIM DE JOGO",128,84,"r","center",true);txt("PAROU NA FASE "+(G.level+1)+" · "+LEVELS[G.level].name,128,112,"W","center");
+    txt(pad(G.snap.score,6)+" PONTOS",128,128,"b","center");txt("A JORNADA RECOMEÇA",128,156,"W","center");
+    if(blink())txt((isTouch?"START":"ENTER")+": VOLTAR À FASE 1",128,172,"y","center");}
   if(st==="win"){ctx.fillStyle="rgba(11,11,26,.7)";ctx.fillRect(0,0,W,H);drawPanel(24,44,208,150);
-    txt("VITÓRIA!",128,56,"y","center",true);txt("CARAMELO CHEGOU",128,82,"W","center");txt("EM CASA!",128,94,"W","center");
-    txt("PONTOS  "+pad(G.score,6),128,120,"W","center");txt("OSSOS   "+pad(G.bones,6),128,134,"W","center");
-    const d=DOG[2];ctx.drawImage(d.r,120,150+Math.round(Math.abs(Math.sin(performance.now()/180))*-6));
+    txt("VITÓRIA!",128,56,"y","center",true);txt("A MATILHA ESTÁ",128,82,"W","center");txt("EM CASA!",128,94,"W","center");
+    txt("PONTOS  "+pad(G.score,6),128,116,"W","center");txt("OSSOS   "+pad(G.bones,6),128,130,"W","center");
+    const tt=performance.now()/16;for(let i=0;i<3;i++)drawDog(i,92+i*24,150,{hop:1},tt+i*13);
     if(blink())txt(isTouch?"START: JOGAR DE NOVO":"ENTER: JOGAR DE NOVO",128,178,"y","center");
     if(frameT%3===0)parts.push({x:G.cam+Math.random()*W,y:-4,vx:(Math.random()-.5),vy:1,t:200,col:["y","r","o","W","s"][frameT%5]});}}
 
