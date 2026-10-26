@@ -153,14 +153,21 @@ function dogSet(top,legs,collar,ov){return legs.map(l=>{let rows=top.concat(l);
   if(ov)rows=rows.map((r,j)=>{r=j<top.length?r.split(collar).join("y"):r;const o=ov[j];if(!o)return r;
     let out="";for(let i=0;i<16;i++)out+=(o[i]&&o[i]!==".")?o[i]:(r[i]||".");return out;});
   return spr(rows);});}
+// Silhueta dourada usada como aura do super poder
+const glow=frames=>frames.map(f=>{const c=document.createElement("canvas");c.width=f.r.width;c.height=f.r.height;const x=c.getContext("2d");
+  x.drawImage(f.r,0,0);x.globalCompositeOperation="source-in";x.fillStyle=PAL.y;x.fillRect(0,0,c.width,c.height);
+  const l=document.createElement("canvas");l.width=c.width;l.height=c.height;const y=l.getContext("2d");y.translate(c.width,0);y.scale(-1,1);y.drawImage(c,0,0);
+  return {r:c,l,w:f.w,h:f.h};});
 const CAPE={7:"........rr......",8:"......rrr.......",9:"...rrrrrr.......",10:".rrrrrr.........",11:"rrrr............"};
 const PILOT={5:"...........qqq..",6:"..........qqqqq.",7:"...........sWs..",9:"......WWW.......",10:"...WWW.........."};
 const ROYAL={2:"..........y.y.y.",3:"..........yyyyy.",9:"......ppp.......",10:"...pppppp.......",11:".ppppp..........",12:"pp.............."};
 // Personagens: max = velocidade máxima, jump = impulso do pulo, hold = gravidade com o botão segurado
 const CHARS=[
-  {name:"CARAMELO",breed:"VIRA-LATA",form:"CAPA DE HERÓI",vel:2,pulo:2,max:2.2,jump:6.2,hold:.28,f:dogSet(DOG_TOP,DOG_LEGS,"r"),fp:dogSet(DOG_TOP,DOG_LEGS,"r",CAPE)},
-  {name:"PAÇOCA",breed:"SALSICHA",form:"PILOTO",vel:3,pulo:1,max:2.5,jump:5.9,hold:.28,f:dogSet(PACOCA_TOP,PACOCA_LEGS,"s"),fp:dogSet(PACOCA_TOP,PACOCA_LEGS,"s",PILOT)},
-  {name:"PIPOCA",breed:"PUG",form:"REALEZA",vel:1,pulo:3,max:1.95,jump:6.6,hold:.27,f:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n"),fp:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n",ROYAL)}];
+  {name:"CARAMELO",breed:"VIRA-LATA",form:"CAPA DE HERÓI",sup:"VOO",supHint:"SEGURE O PULO NO AR",vel:2,pulo:2,max:2.2,jump:6.2,hold:.28,f:dogSet(DOG_TOP,DOG_LEGS,"r"),fp:dogSet(DOG_TOP,DOG_LEGS,"r",CAPE)},
+  {name:"PAÇOCA",breed:"SALSICHA",form:"PILOTO",sup:"TURBO",supHint:"ATROPELA OS INIMIGOS",vel:3,pulo:1,max:2.5,jump:5.9,hold:.28,f:dogSet(PACOCA_TOP,PACOCA_LEGS,"s"),fp:dogSet(PACOCA_TOP,PACOCA_LEGS,"s",PILOT)},
+  {name:"PIPOCA",breed:"PUG",form:"REALEZA",sup:"TERREMOTO",supHint:"ATERRISSE PERTO DELES",vel:1,pulo:3,max:1.95,jump:6.6,hold:.27,f:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n"),fp:dogSet(PIPOCA_TOP,PIPOCA_LEGS,"n",ROYAL)}];
+for(const c of CHARS)c.fg=glow(c.fp);
+const SUPER_TIME=900; // 15 s
 const CAT_TOP=[
 "................","................","................","................",
 "..........Q...Q.","..........QQ.QQ.","..........qqqqq.","Q.........qyqyq.",
@@ -295,7 +302,7 @@ function loadLevel(i){
     else if(ch==="H")house={x:c*TS,y:(r+1)*TS-32,w:32,h:32};
     else keep=true;
     if(!keep)map[r][c]=".";}
-  P={x:sx,y:sy,w:12,h:14,vx:0,vy:0,face:1,onGround:false,coyote:0,jbuf:0,ride:null,inv:0,power:false,anim:0,prevB:0,hidden:false};
+  P={x:sx,y:sy,w:12,h:14,vx:0,vy:0,face:1,onGround:false,coyote:0,jbuf:0,ride:null,inv:0,power:false,sup:0,anim:0,prevB:0,hidden:false};G.shake=0;
   G.time=L.time||300;G.t=0;G.cam=0;updCam();}
 
 function toCard(i,fresh){
@@ -330,17 +337,21 @@ function bump(c,r){const ch=map[r][c];bumps[r+","+c]=10;
   else SFX.bump();}
 
 function updPlayer(){
-  const inp=held(),C=CH(),MAXV=C.max;
+  const inp=held(),C=CH(),sp=P.sup>0,id=G.char,turbo=sp&&id===1,MAXV=turbo?3.8:C.max;
   if(P.ride){moveX(P,P.ride.dx);P.y+=P.ride.dy;}
-  const ax=P.onGround?.15:.1;
+  const ax=(P.onGround?.15:.1)*(turbo?2:1);
   if(inp.l&&!inp.r){P.vx-=P.vx>0?.3:ax;P.face=-1;}
   else if(inp.r&&!inp.l){P.vx+=P.vx<0?.3:ax;P.face=1;}
   else if(P.onGround){P.vx=Math.abs(P.vx)<.18?0:P.vx-Math.sign(P.vx)*.18;}
   P.vx=Math.max(-MAXV,Math.min(MAXV,P.vx));
   if(jumpEdge)P.jbuf=6;else if(P.jbuf>0)P.jbuf--;
   if(P.onGround)P.coyote=6;else if(P.coyote>0)P.coyote--;
-  if(P.jbuf>0&&P.coyote>0){P.vy=-C.jump;P.jbuf=0;P.coyote=0;P.ride=null;SFX.jump();}
-  P.vy+=(P.vy<0&&inp.j)?C.hold:.8;if(P.vy>6)P.vy=6;
+  if(P.jbuf>0&&P.coyote>0){P.vy=-(sp&&id===2?8.2:C.jump);P.jbuf=0;P.coyote=0;P.ride=null;SFX.jump();}
+  if(sp&&id===0&&inp.j&&!P.onGround){ // VOO: segurar o pulo no ar sustenta e sobe
+    P.vy=P.vy<-2.4?P.vy+C.hold:Math.max(-2.4,P.vy-.45);if(P.y<-20){P.y=-20;P.vy=Math.max(P.vy,0);}
+    if(frameT%3===0)parts.push({x:P.x+(P.face>0?0:12),y:P.y+10,vx:-P.face*.6,vy:.6,t:16,col:frameT%6?"r":"y"});}
+  else{P.vy+=(P.vy<0&&inp.j)?C.hold:.8;if(P.vy>6)P.vy=6;}
+  const fallV=P.vy,wasAir=!P.onGround;
   P.prevB=P.y+P.h;
   if(moveX(P,P.vx))P.vx=0;
   P.onGround=false;
@@ -350,14 +361,23 @@ function updPlayer(){
   if(P.vy>=0)for(const m of plats){
     if(P.x+P.w>m.x+1&&P.x<m.x+m.w-1&&P.prevB<=m.y+Math.abs(m.dy)+2&&P.y+P.h>=m.y){P.y=m.y-P.h;P.vy=0;P.onGround=true;P.ride=m;break;}}
   if(P.onGround)combo=0;
+  if(sp&&id===2&&wasAir&&P.onGround&&fallV>3)quake();
+  if(turbo&&P.onGround&&Math.abs(P.vx)>2.5&&frameT%2===0)parts.push({x:P.x+(P.vx>0?0:12),y:P.y+12,vx:-Math.sign(P.vx)*.8,vy:-.3,t:10,col:"W"});
+  if(P.sup>0){if(--P.sup===0){tone(660,220,.3,"square",.05);pops.push({x:P.x-8,y:P.y-12,t:50,s:"FIM DO "+C.sup});}
+    else if(P.sup<120&&P.sup%30===0)tone(880,880,.04,"square",.04);}
   P.anim=P.onGround&&Math.abs(P.vx)>.3?P.anim+Math.abs(P.vx)*.08:0;
   if(P.inv>0)P.inv--;
   if(P.y>rows*TS+8)die(true);}
+// TERREMOTO: a pancada da aterrissagem derruba inimigos no chão por perto
+function quake(){G.shake=14;tone(90,40,.35,"sawtooth",.12);tone(160,60,.2,"square",.08);
+  for(let i=0;i<10;i++)parts.push({x:P.x+6+(i-5)*10,y:P.y+P.h-2,vx:(i-5)*.25,vy:-1.5-Math.random()*2,t:22,col:i%2?"O":"t"});
+  for(const e of ents)if(e.active&&!e.dead&&e.onGround&&Math.abs(e.x-P.x)<130&&Math.abs(e.y+e.h-P.y-P.h)<48){
+    e.dead=40;e.flip=true;e.vy=-4;addScore(200,e.x,e.y-8);}}
 function pFrame(){return G.state==="dying"||!P.onGround?2:P.anim>0?Math.floor(P.anim)%2:0;}
 
 function updEnts(){
   for(const e of ents){
-    if(e.dead){if(--e.dead<=0)e.gone=true;if(e.flip){e.vy+=.3;e.y+=e.vy;}continue;}
+    if(e.dead){if(--e.dead<=0)e.gone=true;if(e.flip){e.vy+=.3;e.y+=e.vy;if(e.vx)e.x+=e.vx*.5;}continue;}
     if(!e.active){if(e.x<G.cam+W+24)e.active=true;else continue;}
     e.vy=Math.min(6,e.vy+.5);
     if(moveX(e,e.vx))e.vx=-e.vx;
@@ -373,17 +393,20 @@ function updItems(){
     else if(it.type==="treat"){
       if(it.rise>0){it.y-=.5;it.rise-=.5;}
       else{it.vy=Math.min(5,it.vy+.4);if(moveX(it,it.vx))it.vx=-it.vx;moveY(it,it.vy);if(it.y>rows*TS)it.gone=true;}
-      if(overlap(P,it)){it.gone=true;SFX.power();if(P.power)addScore(1000,it.x,it.y);else{P.power=true;addScore(500);pops.push({x:P.x-16,y:P.y-14,t:70,s:CH().form+"!"});}puff(it.x+6,it.y+6,"y",10);}}}
+      if(overlap(P,it)){it.gone=true;SFX.power();if(P.sup>0){P.sup=SUPER_TIME;addScore(1000,it.x,it.y);}
+        else if(P.power){P.sup=SUPER_TIME;addScore(1000);pops.push({x:P.x-16,y:P.y-14,t:80,s:"SUPER "+CH().sup+"!"});seq([523,659,784,1047,784,1047,1319,1568],.07);}
+        else{P.power=true;addScore(500);pops.push({x:P.x-16,y:P.y-14,t:70,s:CH().form+"!"});}puff(it.x+6,it.y+6,"y",10);}}}
   items=items.filter(i=>!i.gone);}
 
 function collide(){
   for(const e of ents){if(e.dead||!e.active||!overlap(P,e))continue;
+    if(P.sup>0&&G.char===1){e.dead=40;e.flip=true;e.vy=-4;e.vx=P.vx;addScore(200,e.x,e.y-8);SFX.stomp();puff(e.x+6,e.y+6,"y",6);continue;}
     if(P.vy>0&&(P.prevB<=e.y+6||P.y+P.h<=e.y+e.h/2+3)){
       e.dead=30;e.flip=false;combo++;const pts=100*Math.min(8,1<<(combo-1));addScore(pts,e.x,e.y-8);
       P.vy=held().j?-6.5:-4;P.y=e.y-P.h;SFX.stomp();puff(e.x+e.w/2,e.y+e.h,"W",6);}
     else hurt();}}
-function hurt(){if(P.inv>0)return;if(P.power){P.power=false;P.inv=100;SFX.hurt();puff(P.x+6,P.y+6,"r",8);}else die(false);}
-function die(pit){if(G.state!=="play")return;G.state="dying";G.stateT=110;P.vy=pit?0:-5;P.vx=0;P.power=false;P.pit=pit;SFX.die();}
+function hurt(){if(P.inv>0)return;if(P.power){P.power=false;P.sup=0;P.inv=100;SFX.hurt();puff(P.x+6,P.y+6,"r",8);}else die(false);}
+function die(pit){if(G.state!=="play")return;G.state="dying";G.stateT=110;P.vy=pit?0:-5;P.vx=0;P.power=false;P.sup=0;P.pit=pit;SFX.die();}
 
 function updPlats(){for(const m of plats){const ph=Math.sin(frameT*2*Math.PI/m.per)*m.A;
   const nx=m.kind==="h"?m.x0+ph:m.x0,ny=m.kind==="v"?m.y0+ph:m.y0;m.dx=nx-m.x;m.dy=ny-m.y;m.x=nx;m.y=ny;}}
@@ -394,7 +417,7 @@ function updFx(){for(const p of parts){p.vy+=.15;p.x+=p.vx;p.y+=p.vy;p.t--;}part
 
 // ================= LOOP =================
 function update(){
-  const st=G.state;G.stateT>0&&G.stateT--;
+  const st=G.state;G.stateT>0&&G.stateT--;if(G.shake>0)G.shake--;
   if(st==="title"){if(enterEdge||jumpEdge){SFX.bark();G.state="select";G.stateT=12;}}
   else if(st==="select"){
     if(leftEdge){G.char=(G.char+2)%3;tone(660,660,.05);}
@@ -487,8 +510,11 @@ function drawItems(cx){for(const it of items){
   else if(it.type==="treat")drawSpr(TREAT,it.x-cx,it.y+3,it.vx<0);}}
 
 function drawPlayer(cx){if(P.hidden)return;if(P.inv>0&&Math.floor(P.inv/4)%2)return;
-  const set=P.power?CH().fp:CH().f;
-  drawSpr(set[pFrame()],P.x-cx-2,P.y+P.h-16,P.face<0);
+  const set=P.power?CH().fp:CH().f,f=pFrame(),x=P.x-cx-2,y=P.y+P.h-16,fl=P.face<0;
+  if(P.sup>0&&(P.sup>120||frameT%8<4)){const g=CH().fg[f];
+    if(G.char===1&&Math.abs(P.vx)>2.5){ctx.globalAlpha=.35;drawSpr(g,x-P.vx*5,y,fl);ctx.globalAlpha=.6;drawSpr(g,x-P.vx*2.5,y,fl);ctx.globalAlpha=1;}
+    for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]])drawSpr(g,x+dx,y+dy,fl);}
+  drawSpr(set[f],x,y,fl);
   if(P.power&&frameT%12<6)R2(P.x-cx+(P.face>0?-3:15),P.y+2+(frameT%24<12?0:6),1,1,"y");}
 
 // A fonte não tem algumas maiúsculas acentuadas; troca pela letra sem acento
@@ -500,12 +526,14 @@ function drawHUD(){
   txt("PONTOS",8,5,"y");txt(pad(G.score,6),8,15);
   txt("OSSOS",64,5,"y");ctx.drawImage(BONE_S.r,63,15);txt("x"+pad(G.bones,2),74,15);
   txt("VIDAS",112,5,"y");ctx.drawImage(HEART.r,111,15);txt("x"+G.lives,121,15);if(P&&P.power)ctx.drawImage(TREAT_S.r,140,15);
+  if(P&&P.sup>0&&G.state==="play"){const C=CH(),w=Math.round(80*P.sup/SUPER_TIME);txt("SUPER "+C.sup,8,27,P.sup<120&&frameT%16<8?"W":"y");
+    R2(8,37,82,5,"K");R2(9,38,w,3,"y");if(P.sup>SUPER_TIME-180)txt(C.supHint,8,46,"W");}
   txt("FASE",160,5,"y");txt(String(G.level+1),176,15);
   txt("TEMPO",208,5,"y");txt(pad(G.time,3),220,15,G.time<=50&&frameT%30<15?"r":"W");}
 
 function drawPanel(x,y,w,h){ctx.fillStyle="rgba(11,11,26,.82)";ctx.fillRect(x,y,w,h);R2(x,y,w,1,"W");R2(x,y+h-1,w,1,"W");R2(x,y,1,h,"W");R2(x+w-1,y,1,h,"W");}
 
-function drawWorld(){const cx=G.cam;drawBG(theme===THEMES[0]?0:theme===THEMES[1]?1:2,cx);drawTiles(cx);drawHouse(cx);drawPlats(cx);drawItems(cx);drawEnts(cx);drawPlayer(cx);
+function drawWorld(){const cx=G.cam+(G.shake>0?(G.shake%4<2?2:-2):0);drawBG(theme===THEMES[0]?0:theme===THEMES[1]?1:2,cx);drawTiles(cx);drawHouse(cx);drawPlats(cx);drawItems(cx);drawEnts(cx);drawPlayer(cx);
   for(const p of parts)R2(p.x-cx,p.y,2,2,p.col);for(const p of pops)txt(p.s,p.x-cx,p.y,"W");}
 
 const blink=()=>Math.floor(performance.now()/450)%2===0;
@@ -535,9 +563,10 @@ function render(){
       txt("VEL",x+6,y+90,"W");txt("PULO",x+6,y+106,"W");
       for(let k=0;k<3;k++){R2(x+42+k*10,y+90,8,8,"K");R2(x+43+k*10,y+91,6,6,k<c.vel?"o":"Q");
         R2(x+42+k*10,y+106,8,8,"K");R2(x+43+k*10,y+107,6,6,k<c.pulo?"g":"Q");}}
-    drawPanel(8,172,240,48);txt("COM PERNIL: "+CH().form,128,180,"o","center");
-    txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS ESCOLHEM",128,194,"W","center");
-    if(!isTouch)txt("ENTER CONFIRMA",128,206,"W","center");return;}
+    drawPanel(8,170,240,62);txt("1 PERNIL: "+CH().form,128,176,"o","center");
+    txt("2 PERNIS: SUPER "+CH().sup,128,188,"y","center");
+    txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS ESCOLHEM",128,204,"W","center");
+    if(!isTouch)txt("ENTER CONFIRMA",128,216,"W","center");return;}
   if(st==="card"){R2(0,0,W,H,"K");ui();const L=LEVELS[G.level];
     txt("FASE "+(G.level+1),128,80,"W","center",true);txt(L.name+" · "+L.sub,128,104,"o","center");
     ctx.drawImage(HEART.r,100,136);txt("x "+G.lives,112,136,"W");ctx.drawImage(BONE_S.r,100,152);txt("x "+pad(G.bones,2),112,152,"W");

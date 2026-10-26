@@ -6,13 +6,13 @@ Jogo de plataforma 2D no estilo 8-bit. Escolha um dos três cães e atravesse o 
 
 ## Personagens
 
-| Cão | Raça | Velocidade | Pulo | Com pernil |
-|---|---|---|---|---|
-| Caramelo | vira-lata | média | médio | capa de herói |
-| Paçoca | salsicha | alta | baixo | piloto |
-| Pipoca | pug | baixa | alto | realeza |
+| Cão | Raça | Velocidade | Pulo | 1 pernil | 2 pernis: super poder |
+|---|---|---|---|---|---|
+| Caramelo | vira-lata | média | médio | capa de herói | **Voo**: segurar o pulo no ar faz voar |
+| Paçoca | salsicha | alta | baixo | piloto | **Turbo**: corre muito mais rápido e atropela os inimigos |
+| Pipoca | pug | baixa | alto | realeza | **Terremoto**: pula mais alto e a aterrissagem derruba os inimigos por perto |
 
-O pernil, que sai dos blocos, muda o cão para a segunda forma e aguenta um golpe extra.
+O primeiro pernil, que sai dos blocos, muda o cão para a segunda forma e aguenta um golpe extra. Pegar outro pernil nessa forma ativa o super poder por 15 segundos (a barra aparece embaixo do placar). Levar dano tira o pernil e o super poder.
 
 ## Regras
 
