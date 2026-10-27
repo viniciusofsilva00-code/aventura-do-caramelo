@@ -321,6 +321,66 @@ const SFX={
   life:()=>seq([659,784,1319,1047,1175,1568],.07),
   bark:()=>{tone(520,300,.07,"square",.07);tone(480,260,.09,"square",.07,.1);},
   pause:()=>seq([660,520],.06)};
+// ================= MÚSICA (chiptune original, gerada em tempo real) =================
+// Cada música tem 32 passos de colcheia por volta. "-" segura a nota anterior, "." é pausa.
+// Bateria: k bumbo, s caixa, h chimbal.
+const SONGS={
+ menu:{bpm:132,
+  lead:"E5 G5 C6 G5 A5 G5 E5 - F5 A5 D6 A5 G5 - E5 - D5 E5 F5 G5 A5 G5 F5 E5 D5 - G4 - C5 - - .",
+  bass:"C3 - G3 - C3 - G3 - F2 - C3 - F2 - C3 - D3 - A3 - D3 - G2 - G2 - B2 - C3 - G2 -",
+  drum:"k-h-s-h-k-h-s-h-k-h-s-h-k-hks-hh"},
+ quintal:{bpm:144,
+  lead:"G5 - B5 D6 B5 - G5 - A5 - C6 E6 D6 - B5 - G5 A5 B5 C6 D6 - G5 - E5 F#5 G5 A5 G5 - - .",
+  bass:"G2 - D3 - G2 - D3 - A2 - E3 - D3 - F#3 - G2 - B2 - C3 - E3 - D3 - A2 - G2 - D3 -",
+  drum:"k-hhs-h-k-hhs-h-k-hhs-h-kkhhs-hh"},
+ parque:{bpm:112,
+  lead:"A4 - C5 - F5 - E5 D5 C5 - - . A4 C5 D5 - Bb4 - D5 - G5 - F5 E5 D5 - - . C5 - E5 -",
+  bass:"F2 - - C3 F2 - - C3 D2 - - A2 D2 - - A2 Bb2 - - F3 Bb2 - - F3 C3 - - G3 C3 - E3 -",
+  drum:"k---h---s---h---k---h---s---h-h-"},
+ cidade:{bpm:126,
+  lead:"A4 C5 E5 - D5 C5 B4 - C5 E5 A5 - G5 E5 - . F5 E5 D5 - E5 D5 C5 - B4 - G#4 - A4 - - .",
+  bass:"A2 - A3 A2 - A2 A3 - F2 - F3 F2 - F2 F3 - D2 - D3 D2 - D2 D3 - E2 - E3 E2 - E2 G#2 -",
+  drum:"k-h-s-hkk-h-s-h-k-h-s-hkk-h-s-hs"},
+ boss:{bpm:164,
+  lead:"E5 - E5 G5 F#5 - E5 - D5 - D5 F#5 E5 - B4 - C5 - C5 E5 D5 - B4 - A4 B4 C5 D5 D#5 - B4 -",
+  bass:"E2 E3 E2 E3 E2 E3 E2 E3 D2 D3 D2 D3 D2 D3 D2 D3 C2 C3 C2 C3 C2 C3 C2 C3 B1 B2 B1 B2 B1 B2 D#2 B2",
+  drum:"khshkhshkhshkhshkhshkhshkkshkkss"},
+ vitoria:{bpm:120,
+  lead:"C5 E5 G5 C6 - - G5 - A5 - F5 - C6 - - . D6 - B5 - G5 - E6 - D6 - C6 - - - - .",
+  bass:"C3 - G3 - C3 - G3 - F2 - C3 - F2 - C3 - G2 - D3 - G2 - B2 - C3 - G2 - C3 - - -",
+  drum:"k-h-s-h-k-h-s-h-k-h-s-h-k-k-s-s-"}};
+const NOTE_I={C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+const noteHz=n=>{const m=/^([A-G][#b]?)(\d)$/.exec(n);return m?440*Math.pow(2,(NOTE_I[m[1]]+12*(+m[2]+1)-69)/12):0;};
+for(const k in SONGS){const S=SONGS[k];S.L=S.lead.split(" ");S.B=S.bass.split(" ");}
+const mus={name:null,rate:1,step:0,next:0};let musGain=null,noiseBuf=null;
+function musVoice(type,hz,t,dur,vol){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(hz,t);
+  g.gain.setValueAtTime(vol,t);g.gain.linearRampToValueAtTime(vol*.6,t+dur*.4);g.gain.exponentialRampToValueAtTime(.0004,t+dur);o.connect(g).connect(musGain);o.start(t);o.stop(t+dur+.02);}
+function musDrum(ch,t){
+  if(ch==="k"){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);
+    g.gain.setValueAtTime(.22,t);g.gain.exponentialRampToValueAtTime(.001,t+.14);o.connect(g).connect(musGain);o.start(t);o.stop(t+.16);return;}
+  if(!noiseBuf){noiseBuf=AC.createBuffer(1,AC.sampleRate*.2,AC.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
+  const n=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain(),len=ch==="s"?.1:.03;n.buffer=noiseBuf;
+  f.type=ch==="s"?"bandpass":"highpass";f.frequency.value=ch==="s"?1800:7000;g.gain.setValueAtTime(ch==="s"?.1:.04,t);g.gain.exponentialRampToValueAtTime(.001,t+len);
+  n.connect(f).connect(g).connect(musGain);n.start(t);n.stop(t+len+.01);}
+function musStep(S,i,t,dt){
+  for(const [arr,type,vol] of [[S.L,"square",.032],[S.B,"triangle",.07]]){const tok=arr[i%arr.length];const hz=noteHz(tok);if(!hz)continue;
+    let n=1;while(arr[(i+n)%arr.length]==="-"&&n<8)n++;musVoice(type,hz,t,dt*n*.92,vol);}
+  const d=S.drum[i%S.drum.length];if(d&&d!=="-")musDrum(d,t);}
+// Escolhe a música pelo estado do jogo (com o Parafuso a música da fase acelera)
+function wantMusic(){const st=G.state;
+  if(st==="win")return ["vitoria",1];
+  if(["title","select","mode"].includes(st))return ["menu",1];
+  if(["card","play","pause"].includes(st)){const L=LEVELS[G.level];return [L.boss?"boss":["quintal","parque","cidade"][L.theme],G.crumbleOn?1.15:1];}
+  return [null,1];}
+function musTick(){if(!AC)return;
+  if(!musGain){musGain=AC.createGain();musGain.gain.value=.9;musGain.connect(AC.destination);}
+  musGain.gain.setTargetAtTime(muted?0:(G.state==="pause"?.25:.9),AC.currentTime,.05);
+  const [name,rate]=wantMusic();if(name!==mus.name||rate!==mus.rate){mus.name=name;mus.rate=rate;mus.step=0;mus.next=AC.currentTime+.08;}
+  if(!name||muted)return;const S=SONGS[name],dt=60/(S.bpm*rate)/2;
+  if(mus.next<AC.currentTime-.1)mus.next=AC.currentTime+.02;
+  while(mus.next<AC.currentTime+.18){musStep(S,mus.step,mus.next,dt);mus.step++;mus.next+=dt;}}
+setInterval(musTick,30);
+
 
 // ================= ENTRADA =================
 const keys={},touch={l:false,r:false,j:false};
@@ -770,7 +830,7 @@ function render(){syncFullBtn();
       const f=CHARS[i].f[Math.floor((tt+i*20)/10)%2];ctx.drawImage(f.r,-1,-1);ctx.restore();}
     if(G.secretT>0){drawPanel(24,140,208,20);txt(G.secretMsg,128,146,G.secretT%20<10?"y":"W","center");}
     else if(blink())txt(isTouch?"TOQUE EM START":"APERTE ENTER",128,148,"W","center");
-    txt(isTouch?"":"F: TELA CHEIA",8,228,"b");txt("M: SOM",248,228,"b","right");return;}
+    txt(isTouch?"":"F: TELA CHEIA",8,228,"b");txt("M: SOM E MÚSICA",248,228,"b","right");return;}
   if(st==="select"){
     drawBG(0,200);ui();txt("ESCOLHA SEU CÃO",128,8,"W","center",true);const now=performance.now();
     for(let i=0;i<NCH;i++){const c=CHARS[i],x=9+i*34,y=30,sel=i===G.char,lk=!unlocked[i];

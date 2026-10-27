@@ -50,12 +50,12 @@ O primeiro pernil, que sai dos blocos, muda o cão para a segunda forma e aguent
 - Espaço, W ou ↑: pular (segurar pula mais alto)
 - Enter ou Esc: pausar. No menu de pausa, escolha entre continuar e voltar ao menu inicial
 - Esc ou Backspace: voltar (da escolha de modo para a de cão, e dela para a tela inicial); no celular, botão VOLTAR no canto
-- F: tela cheia · M: som
+- F: tela cheia · M: liga e desliga som e música
 - No celular: botão TELA CHEIA no menu e TELA durante o jogo. No iPhone (o Safari não permite tela cheia em páginas), use Compartilhar → Adicionar à Tela de Início e abra pelo ícone: o jogo roda sem a barra do navegador
 - No celular, botões na tela (TELA liga a tela cheia)
 
 ## Como funciona
 
-Um único `index.html` com HTML, CSS e JavaScript puro em `<canvas>`, sem bibliotecas. A altura interna é de 240 pixels e a largura acompanha a janela (de 256 a 480). Sprites desenhados em código e sons gerados com Web Audio.
+Um único `index.html` com HTML, CSS e JavaScript puro em `<canvas>`, sem bibliotecas. A altura interna é de 240 pixels e a largura acompanha a janela (de 256 a 480). Sprites desenhados em código; efeitos e músicas chiptune (menu, uma por fase, chefão e vitória) gerados com Web Audio a partir de partituras no próprio script (`SONGS`).
 
 Para adicionar uma fase, acrescente um objeto `{name, sub, theme, time, map}` ao array `LEVELS`. A legenda dos tiles está no topo do script.
