@@ -1,4 +1,4 @@
-# Aventura do Caramelo
+# As Aventuras do Caramelo
 
 Jogo de plataforma 2D no estilo 8-bit. Escolha um dos três cães e atravesse o quintal, o parque e os telhados da cidade até a casinha.
 
