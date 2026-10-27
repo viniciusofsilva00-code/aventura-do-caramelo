@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>As Aventuras do Caramelo</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Caramelo">
+<meta name="theme-color" content="#0b0b1a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
@@ -21,6 +28,11 @@ html,body{height:100%;touch-action:none;overscroll-behavior:none;-webkit-text-si
   background:rgba(58,63,122,.92);color:#f8f8f0;font:10px/1 var(--pixel);box-shadow:0 4px 0 #000;touch-action:none;cursor:pointer}
 #bBack:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
 #bBack:focus-visible,#bFull:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#fsHelp{position:fixed;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(11,11,26,.88)}
+#fsHelp[hidden]{display:none}
+#fsHelp .box{max-width:30em;background:var(--bezel);border:3px solid var(--fg);border-radius:6px;padding:18px;font:11px/1.9 var(--pixel);color:var(--fg)}
+#fsHelp b{color:var(--accent);font-weight:normal}
+#fsHelp button{margin-top:12px;padding:10px 16px;border:3px solid #000;border-radius:8px;background:var(--accent);color:#0b0b1a;font:10px/1 var(--pixel)}
 #bFull{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:5;padding:10px 14px;border:3px solid #000;border-radius:10px;
   background:rgba(248,152,56,.92);color:#0b0b1a;font:10px/1 var(--pixel);box-shadow:0 4px 0 #000;touch-action:none}
 #bFull:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
@@ -47,6 +59,11 @@ body.touch #pad{display:flex}
 <body>
 <div id="wrap"><canvas id="screen" width="256" height="240" aria-label="Jogo As Aventuras do Caramelo"></canvas></div>
 <button id="bFull" hidden aria-label="Tela cheia">TELA CHEIA</button>
+<div id="fsHelp" hidden role="dialog" aria-label="Como jogar em tela cheia"><div class="box">
+  <div>Este navegador não deixa o jogo entrar em tela cheia sozinho.</div>
+  <div>No Safari: toque em <b>Compartilhar</b> (o quadrado com a seta) e depois em <b>Adicionar à Tela de Início</b>.</div>
+  <div>Abra o jogo pelo ícone do Caramelo: ele roda sem a barra do navegador.</div>
+  <button id="fsClose">ENTENDI</button></div></div>
 <button id="bBack" hidden aria-label="Voltar">◀ VOLTAR</button>
 <div id="pad" aria-label="Controles de toque">
   <div class="grp">
@@ -334,7 +351,7 @@ bindBtn("bL",()=>{touch.l=true;leftEdge=true;navEdge=true;},()=>touch.l=false);
 bindBtn("bR",()=>{touch.r=true;rightEdge=true;navEdge=true;},()=>touch.r=false);
 bindBtn("bJ",()=>{touch.j=true;jumpEdge=true;confirmEdge=true;},()=>touch.j=false);
 bindBtn("bS",()=>{enterEdge=true;confirmEdge=true;});
-bindBtn("bF",()=>toggleFull());
+bindBtn("bF",()=>{});document.getElementById("bF").addEventListener("click",()=>toggleFull());
 document.addEventListener("fullscreenchange",()=>setTimeout(fit,50));
 cv.addEventListener("pointerdown",()=>{audioOn();if(["title","over","win","select"].includes(G.state))enterEdge=true;});
 addEventListener("blur",()=>{if(G.state==="play"){G.state="pause";G.pauseSel=0;}for(const k in keys)keys[k]=false;touch.l=touch.r=touch.j=false;});
@@ -344,17 +361,19 @@ if(isTouch)document.body.classList.add("touch");
 document.addEventListener("touchmove",e=>{if(e.touches.length>1||e.scale&&e.scale!==1)e.preventDefault();},{passive:false});
 document.addEventListener("touchstart",e=>{if(e.touches.length>1&&!e.target.closest(".btn"))e.preventDefault();},{passive:false});
 ["gesturestart","gesturechange","gestureend"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
-let lastTap=0;document.addEventListener("touchend",e=>{const n=Date.now();if(n-lastTap<350&&!e.target.closest(".btn,#bFull"))e.preventDefault();lastTap=n;},{passive:false});
+let lastTap=0;document.addEventListener("touchend",e=>{const n=Date.now();if(n-lastTap<350&&!e.target.closest(".btn,#bFull,#fsHelp"))e.preventDefault();lastTap=n;},{passive:false});
 document.addEventListener("dblclick",e=>e.preventDefault());
 addEventListener("wheel",e=>{if(e.ctrlKey)e.preventDefault();},{passive:false});
 // Botão de tela cheia no menu inicial (celular), só quando o navegador permite
-const bFull=document.getElementById("bFull"),canFull=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+const bFull=document.getElementById("bFull");
+document.getElementById("fsClose").addEventListener("click",()=>{document.getElementById("fsHelp").hidden=true;});
+document.addEventListener("webkitfullscreenchange",()=>setTimeout(fit,50));
 bFull.addEventListener("click",e=>{e.preventDefault();audioOn();toggleFull();});
 // Botão VOLTAR na escolha de cão (vai à tela inicial) e na escolha de modo (volta aos cães)
 const bBack=document.getElementById("bBack");
 bBack.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();audioOn();escEdge=true;});
 function syncBackBtn(){const show=G.state==="select"||G.state==="mode";if(bBack.hidden===show)bBack.hidden=!show;}
-function syncFullBtn(){syncBackBtn();const show=isTouch&&canFull&&G.state==="title"&&!(document.fullscreenElement||document.webkitFullscreenElement);if(bFull.hidden===show)bFull.hidden=!show;}
+function syncFullBtn(){syncBackBtn();const show=isTouch&&G.state==="title"&&!isFull()&&!isApp();if(bFull.hidden===show)bFull.hidden=!show;}
 
 // Tela inteira: altura fixa de 240 pixels e largura que acompanha a janela (256 a 480)
 function fit(){
@@ -363,8 +382,14 @@ function fit(){
   W=w;if(cv.width!==W)cv.width=W;cv.style.width=Math.round(W*s)+"px";cv.style.height=Math.round(H*s)+"px";
   document.getElementById("wrap").style.paddingBottom=(isTouch&&vh0()>vw)?"150px":"0";}
 function vh0(){return innerHeight;}
-function toggleFull(){try{if(document.fullscreenElement)document.exitFullscreen();
-  else{const el=document.documentElement,f=el.requestFullscreen||el.webkitRequestFullscreen;if(f){const pr=f.call(el);if(pr&&pr.catch)pr.catch(()=>{});}}}catch(e){}}
+const fsHelp=()=>{const h=document.getElementById("fsHelp");h.hidden=false;};
+const isFull=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+const isApp=()=>navigator.standalone===true||matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches;
+function toggleFull(){try{
+  if(isFull()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return;}
+  const el=document.documentElement,f=el.requestFullscreen||el.webkitRequestFullscreen||el.webkitRequestFullScreen;
+  if(!f||!(document.fullscreenEnabled||document.webkitFullscreenEnabled)){if(isTouch&&!isApp())fsHelp();return;}
+  const pr=f.call(el);if(pr&&pr.catch)pr.catch(()=>{if(isTouch&&!isApp())fsHelp();});}catch(e){if(isTouch&&!isApp())fsHelp();}}
 addEventListener("resize",fit);addEventListener("orientationchange",fit);addEventListener("load",fit);fit();
 
 // ================= ESTADO =================

@@ -51,6 +51,7 @@ O primeiro pernil, que sai dos blocos, muda o cão para a segunda forma e aguent
 - Enter ou Esc: pausar. No menu de pausa, escolha entre continuar e voltar ao menu inicial
 - Esc ou Backspace: voltar (da escolha de modo para a de cão, e dela para a tela inicial); no celular, botão VOLTAR no canto
 - F: tela cheia · M: som
+- No celular: botão TELA CHEIA no menu e TELA durante o jogo. No iPhone (o Safari não permite tela cheia em páginas), use Compartilhar → Adicionar à Tela de Início e abra pelo ícone: o jogo roda sem a barra do navegador
 - No celular, botões na tela (TELA liga a tela cheia)
 
 ## Como funciona
