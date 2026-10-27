@@ -30,7 +30,10 @@ Os cães liberados ficam salvos no navegador. Também existe um código secreto,
 ### Parafuso, o cão-robô
 
 - Sempre ativo: engole os gatos e não leva dano deles; os robôs aspiradores viram aliados, seguem ele e não machucam.
-- Em compensação, com ele o chão das fases desmorona: dois segundos depois do início, uma onda apaga o chão atrás dele, cada fase mais rápida. Parar é cair.
+- Em compensação, com ele o mundo se desfaz:
+  - um segundo depois do início, uma onda apaga o chão atrás dele. Ela fica mais rápida a cada fase e em modos mais difíceis, e acelera para alcançá-lo se ele abrir muita vantagem (perto de plataformas móveis ela desacelera um pouco);
+  - pedaços de chão à frente tremem, racham e caem;
+  - pedras caem do céu depois de um aviso vermelho e machucam o Parafuso.
 - Depois da fase 3 vem o chefão **MECA-BIGODE**, um gato-robô gigante que corre, salta e atira parafusos. Ele machuca o Parafuso e precisa de 5 pisões na cabeça.
 
 O primeiro pernil, que sai dos blocos, muda o cão para a segunda forma e aguenta um golpe extra. Pegar outro pernil nessa forma ativa o super poder por 15 segundos (a barra aparece embaixo do placar). Levar dano tira o pernil e o super poder.

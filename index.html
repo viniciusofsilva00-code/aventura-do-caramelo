@@ -344,7 +344,7 @@ addEventListener("resize",fit);addEventListener("orientationchange",fit);addEven
 
 // ================= ESTADO =================
 const G={state:"title",level:0,lives:3,score:0,bones:0,time:300,snap:{score:0,bones:0},lifeMark:0,code:"",secretT:0,secretMsg:"",char:0,diff:1,newUnlock:-1,pauseSel:0,t:0,cardT:0,stateT:0,cam:0};
-let map=[],cols=0,rows=0,theme=THEMES[0],ents=[],plats=[],items=[],parts=[],pops=[],house=null,bumps={},P=null,frameT=0,combo=0,boss=null;
+let map=[],cols=0,rows=0,theme=THEMES[0],ents=[],plats=[],items=[],parts=[],pops=[],house=null,bumps={},P=null,frameT=0,combo=0,boss=null,cracks={};
 const CH=()=>CHARS[G.char];
 const SOLID="#B?PU";
 function solid(c,r){if(c<0||c>=cols)return true;if(r<0||r>=rows)return false;return SOLID.includes(map[r][c]);}
@@ -376,10 +376,27 @@ function loadLevel(i){
   P={x:sx,y:sy,w:12,h:14,vx:0,vy:0,face:1,onGround:false,coyote:0,jbuf:0,ride:null,inv:0,power:false,sup:0,airJ:0,barkT:0,anim:0,prevB:0,hidden:false};G.shake=0;
   allyN=0;G.time=L.time||300;G.t=0;G.cam=0;updCam();
   // Parafuso: o chão desmorona atrás dele, cada fase mais rápido
-  G.crumbleOn=CH().robot&&!L.boss;G.crumble=-48;G.crumbleCol=-3;G.crumbleDelay=120;G.crumbleSpd=[1.35,1.45,1.5][i]||1.5;}
+  // Velocidade base por fase x modo; a onda nunca fica mais longe que "lead" pixels (acelera para alcançar)
+  const dm=[.92,1,1.05,1.1][G.diff];
+  G.crumbleOn=CH().robot&&!L.boss;G.crumble=-48;G.crumbleCol=-3;G.crumbleDelay=60;
+  G.crumbleSpd=Math.min(2.1,([1.6,1.7,1.72][i]||1.7)*dm);G.crumbleLead=[300,260,230][i]||240;
+  // Perigos extras: chão rachando à frente e pedras caindo (intervalos em quadros)
+  G.crackEvery=Math.max(45,[110,90,75,60][G.diff]-i*10);G.rockEvery=Math.max(55,[160,125,100,80][G.diff]-i*12);G.crackT=90;G.rockT=120;cracks={};}
+function topRow(c){if(c<0||c>=cols)return -1;for(let r=0;r<rows;r++)if(map[r][c]!==".")return r;return -1;}
 const lastLevel=()=>CH().robot?LEVELS.length-1:LEVELS.length-2;
 function crumbleStep(){if(!G.crumbleOn)return;if(G.crumbleDelay>0){G.crumbleDelay--;return;}
-  G.crumble+=G.crumbleSpd;const c=Math.floor(G.crumble/TS);
+  // Perto de plataforma móvel a onda desacelera (dá tempo de esperar a plataforma)
+  const gap=P.x-G.crumble,nearPlat=plats.some(m=>Math.abs(m.x0+m.w/2-P.x)<110);
+  G.crumble+=gap>G.crumbleLead?Math.max(G.crumbleSpd,2.9):G.crumbleSpd*(nearPlat?.55:1);
+  // Rachaduras: uma coluna de chão plano à frente treme e cai
+  for(const k in cracks){if(--cracks[k]<=0){const c=+k;delete cracks[k];for(let r=0;r<rows;r++)if(map[r][c]==="#"){map[r][c]=".";if(r%2===0)parts.push({x:c*TS+8,y:r*TS+6,vx:(Math.random()-.5),vy:-1,t:36,col:"O"});}tone(110,50,.15,"sawtooth",.06);}}
+  if(--G.crackT<=0){G.crackT=G.crackEvery;
+    for(let tries=0;tries<8;tries++){const c=Math.floor((P.x+70+Math.random()*130)/TS),top=topRow(c);
+      let flat=top>=0&&map[top][c]==="#";for(let d=1;d<=4&&flat;d++)flat=topRow(c-d)===top&&topRow(c+d)===top;if(!flat)continue;
+      if(cracks[c-1]||cracks[c+1]||cracks[c-2]||cracks[c+2]||(house&&c*TS>house.x-48))continue;
+      cracks[c]=55;break;}}
+  // Pedras: aviso no topo e depois a queda
+  if(--G.rockT<=0){G.rockT=G.rockEvery;const x=P.x+30+Math.random()*120+P.vx*20;items.push({type:"rock",x,y:-14,w:10,h:10,vy:0,warn:45});}const c=Math.floor(G.crumble/TS);
   while(G.crumbleCol<c&&G.crumbleCol<cols){const cc=G.crumbleCol++;if(cc<0)continue;let any=false;
     for(let r=0;r<rows;r++)if(map[r][cc]!=="."){map[r][cc]=".";any=true;if(r%2===0)parts.push({x:cc*TS+4+Math.random()*8,y:r*TS+8,vx:(Math.random()-.5)*1.2,vy:-Math.random(),t:40,col:r%4?"Q":"O"});}
     plats=plats.filter(m=>m.x0+m.w>(cc+1)*TS);if(any&&cc%2===0)tone(70+Math.random()*30,40,.12,"sawtooth",.04);}}
@@ -503,6 +520,10 @@ function updItems(){
       if(overlap(P,it)){it.gone=true;addBones(1);addScore(10);SFX.bone();puff(it.x+6,it.y+4,"W",4);}}
     else if(it.type==="wave"){it.x+=it.vx;if(--it.t<=0||solid(Math.floor((it.x+4)/TS),Math.floor((it.y+8)/TS)))it.gone=true;
       for(const e of ents)if(e.active&&!e.dead&&overlap(it,e)){e.dead=40;e.flip=true;e.vy=-4;addScore(200,e.x,e.y-8);puff(e.x+6,e.y+6,"s",6);}}
+    else if(it.type==="rock"){if(it.warn>0){it.warn--;continue;}
+      it.vy=Math.min(7,it.vy+.35);it.y+=it.vy;
+      if(overlap(P,it)){it.gone=true;hurt();puff(it.x+5,it.y+5,"q",6);}
+      else if(it.y>0&&solid(Math.floor((it.x+5)/TS),Math.floor((it.y+10)/TS))||it.y>rows*TS){it.gone=true;puff(it.x+5,it.y+8,"Q",7);tone(140,60,.08,"square",.05);}}
     else if(it.type==="bolt"){it.x+=it.vx;if(--it.t<=0||solid(Math.floor((it.x+4)/TS),Math.floor((it.y+3)/TS)))it.gone=true;
       else if(overlap(P,it)){it.gone=true;hurt();}}
     else if(it.type==="pop"){it.y-=1.4;if(--it.t<=0){it.gone=true;puff(it.x+6,it.y+4,"y",5);}}
@@ -614,11 +635,12 @@ function drawBG(th,cx){
 function drawTiles(cx){
   const c0=Math.floor(cx/TS),c1=Math.min(cols-1,c0+W/TS+1),qf=Math.floor(frameT/24)%3===2?1:0;
   for(let r=0;r<rows;r++)for(let c=c0;c<=c1;c++){const ch=map[r][c];if(ch===".")continue;
-    const b=bumps[r+","+c],oy=b?-Math.round(Math.sin((10-b)/10*Math.PI)*5):0,x=c*TS-cx,y=r*TS+oy;
+    const b=bumps[r+","+c],ck=cracks[c],oy=b?-Math.round(Math.sin((10-b)/10*Math.PI)*5):0,x=c*TS-cx+(ck?(frameT%4<2?1:-1):0),y=r*TS+oy;
     let img;
     if(ch==="#"){const top=!(r>0&&map[r-1][c]==="#");img=top?theme.top:(theme.fillB&&hash(c*31+r)%4===0?theme.fillB:theme.fill);}
     else if(ch==="B")img=theme.brick;else if(ch==="?"||ch==="P")img=QBLK[qf];else if(ch==="U")img=UBLK;
-    if(img)ctx.drawImage(img,x,y);}}
+    if(img)ctx.drawImage(img,x,y);
+    if(ck&&ch==="#"){R2(x+7,y+1,1,6,"K");R2(x+5,y+6,2,1,"K");R2(x+8,y+7,1,5,"K");R2(x+10,y+11,2,1,"K");}}}
 
 function drawHouse(cx){if(house)drawKennel(house.x-cx,house.y);}
 function drawKennel(x,y){
@@ -642,6 +664,9 @@ function drawEnts(cx){const f=Math.floor(frameT/10)%2;for(const e of ents){if(!e
 function drawItems(cx){for(const it of items){
   if(it.type==="bone")drawSpr(BONE,it.x-cx-1,it.y+Math.round(Math.sin((frameT+it.bob)/12)*1.5),false);
   else if(it.type==="pop")drawSpr(BONE,it.x-cx-1,it.y,false);
+  else if(it.type==="rock"){const x=Math.round(it.x-cx);
+    if(it.warn>0){if(it.warn%10<6){R2(x+3,30,4,9,"r");R2(x+3,41,4,3,"r");}}
+    else{const y=Math.round(it.y);R2(x,y,10,10,"K");R2(x+1,y+1,8,8,"Q");R2(x+2,y+2,4,3,"q");}}
   else if(it.type==="bolt"){const x=Math.round(it.x-cx),y=Math.round(it.y);R2(x,y,8,6,"K");R2(x+1,y+1,6,4,frameT%8<4?"y":"q");R2(x+3,y,2,6,"Q");}
   else if(it.type==="wave"){const x=Math.round(it.x-cx),d=it.vx>0?1:-1,k=(45-it.t)/45;
     for(let a=0;a<3;a++){const ox=x+d*a*4,hh=6+a*4,c=a===1?"s":"W";R2(ox,it.y+8-hh,2,hh*2,c);R2(ox-d*2,it.y+8-hh-1,2,2,c);R2(ox-d*2,it.y+8+hh-1,2,2,c);}}
@@ -724,7 +749,7 @@ function render(){
     txt("VENÇA E LIBERE O PRÊMIO",128,204,"b","center");return;}
   if(st==="card"){R2(0,0,W,H,"K");ui();const L=LEVELS[G.level];
     txt(L.boss?"CHEFÃO":"FASE "+(G.level+1),128,80,L.boss?"r":"W","center",true);
-    if(L.boss)txt("PULE 5 VEZES NA CABEÇA DELE",128,120,"y","center");else if(CH().robot)txt("O CHÃO VAI DESMORONAR. CORRA!",128,120,"r","center");txt("MODO "+MODES[G.diff][0],128,214,"b","center");txt(L.name+" · "+L.sub,128,104,"o","center");
+    if(L.boss)txt("PULE 5 VEZES NA CABEÇA DELE",128,120,"y","center");else if(CH().robot){txt("O CHÃO VAI DESMORONAR. CORRA!",128,120,"r","center");txt("CUIDADO: RACHADURAS E PEDRAS",128,132,"o","center");}txt("MODO "+MODES[G.diff][0],128,214,"b","center");txt(L.name+" · "+L.sub,128,104,"o","center");
     ctx.drawImage(HEART.r,100,136);txt("x "+G.lives,112,136,"W");ctx.drawImage(BONE_S.r,100,152);txt("x "+pad(G.bones,2),112,152,"W");
     txt(pad(G.score,6)+" PONTOS",128,176,"b","center");
     txt("VIDA EXTRA EM "+(BONES_PER_LIFE*(G.lifeMark+1)-G.bones)+" OSSOS",128,196,"Q","center");
