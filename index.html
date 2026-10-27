@@ -17,6 +17,10 @@
 }
 html,body{height:100%;touch-action:none;overscroll-behavior:none;-webkit-text-size-adjust:100%}
 #screen,#pad,#pad *{touch-action:none}
+#bBack{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:12px;z-index:5;padding:10px 14px;border:3px solid #000;border-radius:10px;
+  background:rgba(58,63,122,.92);color:#f8f8f0;font:10px/1 var(--pixel);box-shadow:0 4px 0 #000;touch-action:none;cursor:pointer}
+#bBack:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+#bBack:focus-visible,#bFull:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 #bFull{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:5;padding:10px 14px;border:3px solid #000;border-radius:10px;
   background:rgba(248,152,56,.92);color:#0b0b1a;font:10px/1 var(--pixel);box-shadow:0 4px 0 #000;touch-action:none}
 #bFull:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
@@ -43,6 +47,7 @@ body.touch #pad{display:flex}
 <body>
 <div id="wrap"><canvas id="screen" width="256" height="240" aria-label="Jogo As Aventuras do Caramelo"></canvas></div>
 <button id="bFull" hidden aria-label="Tela cheia">TELA CHEIA</button>
+<button id="bBack" hidden aria-label="Voltar">◀ VOLTAR</button>
 <div id="pad" aria-label="Controles de toque">
   <div class="grp">
     <button class="btn" id="bL" aria-label="Esquerda"><span class="arrow l"></span></button>
@@ -311,7 +316,7 @@ addEventListener("keydown",e=>{
   if(e.code==="Enter"||e.code==="NumpadEnter")enterEdge=true;
   if(["ArrowUp","ArrowDown","KeyW","KeyS","ArrowLeft","ArrowRight","KeyA","KeyD"].includes(e.code))navEdge=true;
   if(["Enter","NumpadEnter","Space"].includes(e.code))confirmEdge=true;
-  if(e.code==="Escape"){if(G.state==="play")enterEdge=true;escEdge=true;}
+  if(e.code==="Escape"||e.code==="Backspace"){if(e.code==="Escape"&&G.state==="play")enterEdge=true;escEdge=true;if(e.code==="Backspace")e.preventDefault();}
   if(e.code==="ArrowUp"||e.code==="KeyW")upEdge=true;
   if(e.code==="ArrowDown"||e.code==="KeyS")downEdge=true;
   if(e.code==="ArrowLeft"||e.code==="KeyA")leftEdge=true;
@@ -345,7 +350,11 @@ addEventListener("wheel",e=>{if(e.ctrlKey)e.preventDefault();},{passive:false});
 // Botão de tela cheia no menu inicial (celular), só quando o navegador permite
 const bFull=document.getElementById("bFull"),canFull=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
 bFull.addEventListener("click",e=>{e.preventDefault();audioOn();toggleFull();});
-function syncFullBtn(){const show=isTouch&&canFull&&G.state==="title"&&!(document.fullscreenElement||document.webkitFullscreenElement);if(bFull.hidden===show)bFull.hidden=!show;}
+// Botão VOLTAR na escolha de cão (vai à tela inicial) e na escolha de modo (volta aos cães)
+const bBack=document.getElementById("bBack");
+bBack.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();audioOn();escEdge=true;});
+function syncBackBtn(){const show=G.state==="select"||G.state==="mode";if(bBack.hidden===show)bBack.hidden=!show;}
+function syncFullBtn(){syncBackBtn();const show=isTouch&&canFull&&G.state==="title"&&!(document.fullscreenElement||document.webkitFullscreenElement);if(bFull.hidden===show)bFull.hidden=!show;}
 
 // Tela inteira: altura fixa de 240 pixels e largura que acompanha a janela (256 a 480)
 function fit(){
@@ -582,6 +591,7 @@ function update(){
       if(G.code===SECRET){G.code="";const n=[3,4,5,6].filter(i=>unlock(i)).length;G.secretT=150;G.secretMsg=n?"TODOS OS CÃES LIBERADOS!":"JÁ ESTÁ TUDO LIBERADO";SFX.life();}}
     if(G.secretT>0)G.secretT--;
     if(enterEdge||jumpEdge){SFX.bark();G.state="select";G.stateT=12;}}
+  else if(st==="select"&&escEdge){G.state="title";G.stateT=10;tone(520,330,.08);}
   else if(st==="select"){
     if(leftEdge){G.char=(G.char+NCH-1)%NCH;tone(660,660,.05);}
     if(rightEdge){G.char=(G.char+1)%NCH;tone(660,660,.05);}
@@ -591,7 +601,7 @@ function update(){
   else if(st==="mode"){
     if(upEdge||leftEdge){G.diff=(G.diff+3)%4;tone(660,660,.05);}
     if(downEdge||rightEdge){G.diff=(G.diff+1)%4;tone(660,660,.05);}
-    if(escEdge){G.state="select";G.stateT=10;}
+    if(escEdge){G.state="select";G.stateT=10;tone(520,330,.08);}
     else if(confirmEdge&&G.stateT<=0){SFX.bark();newGame();}}
   else if(st==="card"){if(--G.cardT<=0)G.state="play";}
   else if(st==="pause"){
@@ -754,7 +764,7 @@ function render(){syncFullBtn();
       for(let k=0;k<3;k++){R2(56+k*10,116,8,8,"K");R2(57+k*10,117,6,6,k<c.vel?"o":"Q");R2(56+k*10,128,8,8,"K");R2(57+k*10,129,6,6,k<c.pulo?"g":"Q");}
       if(c.robot)txt("ASPIRADORES SÃO ALIADOS",18,140,"g");
       txt("1 PERNIL: "+c.form,18,c.robot?150:144,"o");txt("2 PERNIS: SUPER "+c.sup,18,c.robot?160:156,"y");txt(c.supHint,18,c.robot?170:166,"b");}
-    drawPanel(8,188,240,18);txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS ESCOLHEM · ENTER OK",128,193,"W","center");return;}
+    drawPanel(8,188,240,18);txt(isTouch?"◀ ▶ ESCOLHE · START OK":"SETAS · ENTER OK · ESC VOLTA",128,193,"W","center");return;}
   if(st==="mode"){
     drawBG(1,200);ui();txt("ESCOLHA O MODO",128,10,"W","center",true);
     MODES.forEach((m,i)=>{const y=30+i*38,sel=G.diff===i,u=3+i,c=CHARS[u];drawPanel(16,y,224,35);
